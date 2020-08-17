@@ -15,7 +15,7 @@ This requires the libgo2 library from: https://github.com/OtherCrashOverride/lib
 
 It also requires the following packages:
 
-    libopenal-dev
+    build-essential libopenal-dev
 
 To build the application run:
 
