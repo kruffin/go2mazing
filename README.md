@@ -1,7 +1,7 @@
 ## What is it?
 A fun<sub>*</sub> little maze game for the ODroid Go Advance.
 
-<sub>*</sub> opinion of its creator.
+<sub>*</sub> opinion of its creator; he would even say a mazing game.
 
 ## Build
 Pull down the submodules.
