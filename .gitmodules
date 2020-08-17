@@ -1,0 +1,6 @@
+[submodule "lib/ugui"]
+	path = lib/ugui
+	url = https://github.com/kruffin/UGUI.git
+[submodule "lib/dr_libs"]
+	path = lib/dr_libs
+	url = https://github.com/kruffin/dr_libs
