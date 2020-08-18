@@ -57,6 +57,9 @@ void MazeScreen::draw() {
 					case MazeData::WALKED:
 						c = C_DARK_ORCHID;
 						break;
+					case MazeData::UNDEFINED:
+						c = C_BLACK;
+						break;
 				}
 				if (-1 != c) {
 					UG_FillFrame(begin_x + x*point_size, begin_y + y*point_size,
@@ -80,7 +83,7 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 		gamepad->buttons.x || gamepad->buttons.y ||
 		gamepad->buttons.top_left || gamepad->buttons.top_right) {
 
-		if (4 == this->maze_data->level) {
+		if (10 == this->maze_data->level) {
 			change_scene(SCREEN_TITLE, (SceneData *)NULL);
 		} else {
 			MazeData *data = new MazeData(11 + this->maze_data->level * 2,
@@ -99,6 +102,7 @@ void MazeScreen::setSceneData(SceneData *data) {
 			delete this->maze_data;
 		}
 		this->maze_data = static_cast<MazeData *>(data);
+		this->maze_data->generate();
 	} else {
 		std::cout << "Incorrect data sent to maze scene: " << data->getType() << std::endl;
 		if (NULL != data) {
