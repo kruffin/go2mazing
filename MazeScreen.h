@@ -19,4 +19,8 @@ private:
 	int screen_width;
 	MazeData *maze_data;
 	std::string no_maze_str;
+	short point_size;
+	int offset_y;
+	int max_cols;
+	int max_rows;
 };
