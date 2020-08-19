@@ -33,4 +33,5 @@ private:
 	size_t background_samples;
 	drwav_uint64 background_frame_count;
 	clock_t play_time;
+	std::string version;
 };

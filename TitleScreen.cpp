@@ -21,6 +21,8 @@ TitleScreen::TitleScreen(int screen_width, int screen_height) {
 	this->author_text = std::string("a kruffin production");
 	this->author_text_color = C_GRAY;
 	this->play_time = -1;
+
+	this->version = std::string("v0.1.0");
 }
 
 TitleScreen::~TitleScreen() {
@@ -100,6 +102,11 @@ void TitleScreen::draw() {
 	UG_PutString(this->screen_width - 9*this->author_text.length(), 
 				 this->screen_height - 10, 
 				 const_cast<char*>(this->author_text.c_str()));
+
+	UG_FillRoundFrame(0, 0,
+					  9 * this->version.length(), 10,
+					  2, C_INDIGO);
+	UG_PutString(1, 1, const_cast<char*>(this->version.c_str()));
 }
 
 bool TitleScreen::handleInput(go2_gamepad_state_t *gamepad) {
