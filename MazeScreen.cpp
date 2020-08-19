@@ -20,6 +20,8 @@ MazeScreen::MazeScreen(int screen_width, int screen_height) {
 	if (this->max_rows % 2 == 0) {
 		this->max_rows--;
 	}
+	this->player = Player(0,0);
+	this->goal = Goal(0,0);
 }
 
 MazeScreen::~MazeScreen() {
@@ -54,6 +56,12 @@ void MazeScreen::draw() {
 		short begin_x = this->screen_width/2 - (this->maze_data->columns * this->point_size / 2);
 		short begin_y = (this->screen_height - this->offset_y)/2 + this->offset_y - (this->maze_data->rows * this->point_size / 2);
 
+		this->player.world_x = begin_x + this->player.cell_x * this->point_size;
+		this->player.world_y = begin_y + this->player.cell_y * this->point_size;
+
+		this->goal.world_x = begin_x + this->goal.cell_x * this->point_size;
+		this->goal.world_y = begin_y + this->goal.cell_y * this->point_size;
+
 		for (short x = 0; x < this->maze_data->columns; ++x) {
 			for (short y = 0; y < this->maze_data->rows; ++y) {
 				char px = this->maze_data->get(x, y);
@@ -80,6 +88,9 @@ void MazeScreen::draw() {
 				}
 			}
 		}
+
+		this->player.draw();
+		this->goal.draw();
 	}
 }
 
@@ -106,6 +117,40 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 		}
 		return true;
 	}
+
+	if (gamepad->dpad.left) {
+		int new_x = std::clamp(this->player.cell_x - 1, -1, this->maze_data->columns);
+		if (this->maze_data->get(new_x, this->player.cell_y) != MazeData::WALL) {
+			this->player.cell_x = new_x;
+		} else {
+			// play bonk
+		}
+		return true;
+	} else if (gamepad->dpad.right) {
+		int new_x = std::clamp(this->player.cell_x + 1, -1, this->maze_data->columns);
+		if (this->maze_data->get(new_x, this->player.cell_y) != MazeData::WALL) {
+			this->player.cell_x = new_x;
+		} else {
+			// play bonk
+		}
+		return true;
+	} else if (gamepad->dpad.up && -1 != this->player.cell_x) {
+		int new_y = std::clamp(this->player.cell_y - 1, 0, this->maze_data->rows - 1);
+		if (this->maze_data->get(this->player.cell_x, new_y) != MazeData::WALL) {
+			this->player.cell_y = new_y;
+		} else {
+			// play bonk;
+		}
+		return true;
+	} else if (gamepad->dpad.down && -1 != this->player.cell_x) {
+		int new_y = std::clamp(this->player.cell_y + 1, 0, this->maze_data->rows - 1);
+		if (this->maze_data->get(this->player.cell_x, new_y) != MazeData::WALL) {
+			this->player.cell_y = new_y;
+		} else {
+			// play bonk;
+		}
+		return true;
+	}
 	return false;
 }
 
@@ -115,7 +160,15 @@ void MazeScreen::setSceneData(SceneData *data) {
 			delete this->maze_data;
 		}
 		this->maze_data = static_cast<MazeData *>(data);
-		this->maze_data->generate();
+		MazeData::maze_cell entrances[2];
+		this->maze_data->generate((MazeData::maze_cell *)&entrances);
+
+		this->player.cell_x = -1;
+		this->player.cell_y = entrances[0].y * 2 + 1;
+
+		this->goal.cell_x = (entrances[1].x + 1) * 2 + 1;
+		this->goal.cell_y = entrances[1].y * 2 + 1;
+
 	} else {
 		std::cout << "Incorrect data sent to maze scene: " << data->getType() << std::endl;
 		if (NULL != data) {

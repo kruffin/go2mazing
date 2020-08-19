@@ -62,7 +62,14 @@ public:
 	void set(int x, int y, char val) {
 		this->maze[x + y*columns] = val;
 	}
-	void generate() {
+
+	struct maze_cell {
+		int x;
+		int y;
+	};
+
+	// Expects a two element array input.
+	void generate(maze_cell *entrances) {
 		// Put walls all around it
 		for (int x = 0; x < columns; ++x) {
 			for (int y = 0; y < rows; ++y) {
@@ -75,16 +82,10 @@ public:
 			}
 		}
 
-		floodFill();
+		floodFill(entrances);
 	}
 
-	struct maze_cell {
-		int x;
-		int y;
-	};
-
-
-	void floodFill() {
+	void floodFill(maze_cell *entrances) {
 		// minus 1 for the top wall; divide by 2 for every other
 		// being a valid path; subtract a final 1 for zero-index.
 		int path_rows = (this->rows - 1) / 2 - 1;
@@ -110,6 +111,8 @@ public:
 		std::vector<maze_cell> cells;
 		std::vector<maze_cell> dirs;
 		maze_cell c;
+		entrances[0] = {0, start_cell_y};
+		entrances[1] = {path_cols, end_cell_y};
 		cells.push_back({0, start_cell_y});
 
 		clock_t start_time = clock();

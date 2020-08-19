@@ -4,6 +4,8 @@
 #include "lib/dr_libs/dr_wav.h"
 #include "lib/ugui/ugui.h"
 #include "Scene.h"
+#include "Player.h"
+#include "Goal.h"
 
 class MazeScreen : public Scene {
 public:
@@ -23,4 +25,6 @@ private:
 	int offset_y;
 	int max_cols;
 	int max_rows;
+	Player player;
+	Goal goal;
 };
