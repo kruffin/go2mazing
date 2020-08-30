@@ -12,6 +12,7 @@ namespace fs = std::filesystem::__cxx11;
 #include "lib/dr_libs/dr_wav.h"
 #include "lib/ugui/ugui.h"
 #include "Scene.h"
+#include "Drawing.h"
 #include "TitleScreen.h"
 #include "MazeScreen.h"
 #include "Sound.h"
@@ -70,6 +71,7 @@ int main(int argc, char * argv[]) {
 	initGo2();
 	initUgui();
 	title_screen->load(progPath);
+	maze_screen->load(progPath);
 	last_press = clock();
 	idle_since = clock();
 	last_draw_time = clock();
@@ -248,4 +250,10 @@ void change_scene(SceneType scene, SceneData *data) {
 	current_screen = scene;
 	get_current_screen()->setSceneData(data);
 	dirty_display = true;
+}
+
+void KR_blit(int x, int y, Sprite *s, int frame) {
+	uint8_t* dst = (uint8_t*)go2_surface_map(surface);
+
+	s->blit(frame, x, y, dst, go2_surface_stride_get(surface), width, height, bytes_per_pixel*8);
 }

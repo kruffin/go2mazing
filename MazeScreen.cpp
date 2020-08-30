@@ -3,6 +3,8 @@
 #include <algorithm>
 
 #include "MazeScreen.h"
+#include "Sound.h"
+#include "Drawing.h"
 
 MazeScreen::MazeScreen(int screen_width, int screen_height) {
 	this->screen_width = screen_width;
@@ -22,6 +24,9 @@ MazeScreen::MazeScreen(int screen_width, int screen_height) {
 	}
 	this->player = Player(0,0);
 	this->goal = Goal(0,0);
+	this->walls = Sprite();
+
+	this->maze_complete = -1.0;
 }
 
 MazeScreen::~MazeScreen() {
@@ -31,7 +36,22 @@ MazeScreen::~MazeScreen() {
 }
 
 void MazeScreen::update(double dt, double totalTime) {
+	if (this->maze_complete > 0) {
 
+		if (double(clock() - this->maze_complete) / double(CLOCKS_PER_SEC) > 6.0) {
+			MazeData *data = new MazeData(std::clamp(11 + this->maze_data->level * 2, 1, this->max_cols),
+										  std::clamp(11 + this->maze_data->level * 2, 1, this->max_rows),
+										  this->maze_data->level + 1);
+			change_scene(SCREEN_MAZE, data);
+		} else {
+			this->goal.world_x = this->begin_x + this->goal.cell_x * this->point_size + sin(totalTime - this->maze_complete / double(CLOCKS_PER_SEC)) * 10.0;
+			this->goal.world_y += dt * 20.0;
+		}
+	}
+
+
+	this->player.update(dt, totalTime);
+	this->goal.update(dt, totalTime);
 }
 
 void MazeScreen::draw() {
@@ -53,38 +73,41 @@ void MazeScreen::draw() {
 		sprintf(lvl, "Lvl: %d", this->maze_data->level);
 		UG_PutString(20, 10, (char *)lvl);
 
-		short begin_x = this->screen_width/2 - (this->maze_data->columns * this->point_size / 2);
-		short begin_y = (this->screen_height - this->offset_y)/2 + this->offset_y - (this->maze_data->rows * this->point_size / 2);
-
-		this->player.world_x = begin_x + this->player.cell_x * this->point_size;
-		this->player.world_y = begin_y + this->player.cell_y * this->point_size;
-
-		this->goal.world_x = begin_x + this->goal.cell_x * this->point_size;
-		this->goal.world_y = begin_y + this->goal.cell_y * this->point_size;
-
 		for (short x = 0; x < this->maze_data->columns; ++x) {
 			for (short y = 0; y < this->maze_data->rows; ++y) {
 				char px = this->maze_data->get(x, y);
-				UG_COLOR c;
+				UG_COLOR c = -1;
+				int wall_frame = -1;
+				int path_frame = -1;
 				switch (px) {
 					case MazeData::WALL:
-						c = C_INDIGO;
+						// c = C_INDIGO;
+						wall_frame = (this->maze_data->columns * y + x) % this->walls.frameCols;
 						break;
 					case MazeData::PATH:
-						c = -1;
+						path_frame = (this->maze_data->columns * y + x) % this->paths.frameCols;
 						break;
 					case MazeData::WALKED:
-						c = C_DARK_ORCHID;
+						path_frame = this->paths.frameCols + (this->maze_data->columns * y + x) % this->paths.frameCols;
+						// c = C_DARK_ORCHID;
 						break;
 					case MazeData::UNDEFINED:
 						c = C_BLACK;
 						break;
 				}
 				if (-1 != c) {
-					UG_FillFrame(begin_x + x*this->point_size, begin_y + y*this->point_size,
-								 begin_x + (x + 1)*this->point_size, begin_y + (y + 1)*this->point_size,
+					UG_FillFrame(this->begin_x + x*this->point_size, this->begin_y + y*this->point_size,
+								 this->begin_x + (x + 1)*this->point_size, this->begin_y + (y + 1)*this->point_size,
 								 c);
 					// UG_DrawPixel(begin_x + x, begin_y + y, c);
+				}
+				if (-1 != wall_frame) {
+					KR_blit(this->begin_x + x*this->point_size, this->begin_y + y*this->point_size,
+							&this->walls, wall_frame);
+				}
+				if (-1 != path_frame) {
+					KR_blit(this->begin_x + x*this->point_size, this->begin_y + y*this->point_size,
+							&this->paths, path_frame);
 				}
 			}
 		}
@@ -95,59 +118,126 @@ void MazeScreen::draw() {
 }
 
 bool MazeScreen::load(std::string programPath) {
+	if (!this->player.load(programPath + "images/prill.png", 4, 4, 0)) {
+		return false;
+	}
+	if (!this->goal.load(programPath + "images/cake.png", 4, 1, 0)) {
+		return false;
+	}
+	if (!this->walls.load(programPath + "images/walls.png", 8, 1, 0)) {
+		return false;
+	}
+	if (!this->paths.load(programPath + "images/paths.png", 8, 2, 0)) {
+		return false;
+	}
+
+	drwav wav;
+	if (!drwav_init_file(&wav, (programPath + "sounds/bonk.wav").c_str(), NULL)) {
+		std::cout << "Failed to load sound." << std::endl;
+		return false;
+	} else {
+		std::cout << "Channels: " << wav.channels << std::endl;
+		this->bonk_audio = (drwav_int16*)malloc(wav.totalPCMFrameCount * wav.channels * sizeof(drwav_int16));
+		this->bonk_samples = drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, this->bonk_audio);
+		this->bonk_frame_count = wav.totalPCMFrameCount;
+		std::cout << "Samples: " << this->bonk_samples << " Frames: " << this->bonk_frame_count << std::endl;
+		drwav_uninit(&wav);
+	}
+
 	return true;
 }
 
 bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
-	if (gamepad->buttons.top_left || gamepad->buttons.top_right) {
-
-		if (1 == this->maze_data->level && gamepad->buttons.top_left) {
-			change_scene(SCREEN_TITLE, (SceneData *)NULL);
-		} else if(gamepad->buttons.top_left) {
-			MazeData *data = new MazeData(std::clamp(11 + (this->maze_data->level - 2) * 2, 1, this->max_cols),
-										  std::clamp(11 + (this->maze_data->level - 2) * 2, 1, this->max_rows),
-										  this->maze_data->level - 1);
-			change_scene(SCREEN_MAZE, data);
-		}
-		else {
-			MazeData *data = new MazeData(std::clamp(11 + this->maze_data->level * 2, 1, this->max_cols),
-										  std::clamp(11 + this->maze_data->level * 2, 1, this->max_rows),
-										  this->maze_data->level + 1);
-			change_scene(SCREEN_MAZE, data);
-		}
-		return true;
+	if (this->maze_complete > 0) {
+		return false; // Don't allow input
 	}
+	// if (gamepad->buttons.top_left || gamepad->buttons.top_right) {
+
+	// 	if (1 == this->maze_data->level && gamepad->buttons.top_left) {
+	// 		change_scene(SCREEN_TITLE, (SceneData *)NULL);
+	// 	} else if(gamepad->buttons.top_left) {
+	// 		MazeData *data = new MazeData(std::clamp(11 + (this->maze_data->level - 2) * 2, 1, this->max_cols),
+	// 									  std::clamp(11 + (this->maze_data->level - 2) * 2, 1, this->max_rows),
+	// 									  this->maze_data->level - 1);
+	// 		change_scene(SCREEN_MAZE, data);
+	// 	}
+	// 	// else {
+	// 	// 	MazeData *data = new MazeData(std::clamp(11 + this->maze_data->level * 2, 1, this->max_cols),
+	// 	// 								  std::clamp(11 + this->maze_data->level * 2, 1, this->max_rows),
+	// 	// 								  this->maze_data->level + 1);
+	// 	// 	change_scene(SCREEN_MAZE, data);
+	// 	// }
+	// 	return true;
+	// }
+
 
 	if (gamepad->dpad.left) {
 		int new_x = std::clamp(this->player.cell_x - 1, -1, this->maze_data->columns);
 		if (this->maze_data->get(new_x, this->player.cell_y) != MazeData::WALL) {
 			this->player.cell_x = new_x;
+			this->player.animation = Player::ANIM_LEFT;
+
+			this->player.world_x = this->begin_x + this->player.cell_x * this->point_size;
+			this->player.world_y = this->begin_y + this->player.cell_y * this->point_size;
+
+			this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
 		} else {
 			// play bonk
+			play_sound(const_cast<short *>(this->bonk_audio), int(this->bonk_frame_count));
+			this->player.animation = Player::ANIM_LEFT;
 		}
 		return true;
 	} else if (gamepad->dpad.right) {
 		int new_x = std::clamp(this->player.cell_x + 1, -1, this->maze_data->columns);
 		if (this->maze_data->get(new_x, this->player.cell_y) != MazeData::WALL) {
 			this->player.cell_x = new_x;
+			this->player.animation = Player::ANIM_RIGHT;
+
+			this->player.world_x = this->begin_x + this->player.cell_x * this->point_size;
+			this->player.world_y = this->begin_y + this->player.cell_y * this->point_size;
+
+			this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
+
+			if (new_x == this->goal.cell_x - 1) {
+				// Reached end of maze.
+				this->maze_complete = clock();
+			}
 		} else {
 			// play bonk
+			play_sound(const_cast<short *>(this->bonk_audio), int(this->bonk_frame_count));
+			this->player.animation = Player::ANIM_RIGHT;
 		}
 		return true;
 	} else if (gamepad->dpad.up && -1 != this->player.cell_x) {
 		int new_y = std::clamp(this->player.cell_y - 1, 0, this->maze_data->rows - 1);
 		if (this->maze_data->get(this->player.cell_x, new_y) != MazeData::WALL) {
 			this->player.cell_y = new_y;
+			this->player.animation = Player::ANIM_UP;
+
+			this->player.world_x = this->begin_x + this->player.cell_x * this->point_size;
+			this->player.world_y = this->begin_y + this->player.cell_y * this->point_size;
+
+			this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
 		} else {
-			// play bonk;
+			// play bonk
+			play_sound(const_cast<short *>(this->bonk_audio), int(this->bonk_frame_count));
+			this->player.animation = Player::ANIM_UP;
 		}
 		return true;
 	} else if (gamepad->dpad.down && -1 != this->player.cell_x) {
 		int new_y = std::clamp(this->player.cell_y + 1, 0, this->maze_data->rows - 1);
 		if (this->maze_data->get(this->player.cell_x, new_y) != MazeData::WALL) {
 			this->player.cell_y = new_y;
+			this->player.animation = Player::ANIM_DOWN;
+
+			this->player.world_x = this->begin_x + this->player.cell_x * this->point_size;
+			this->player.world_y = this->begin_y + this->player.cell_y * this->point_size;
+
+			this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
 		} else {
-			// play bonk;
+			// play bonk
+			play_sound(const_cast<short *>(this->bonk_audio), int(this->bonk_frame_count));
+			this->player.animation = Player::ANIM_DOWN;
 		}
 		return true;
 	}
@@ -168,6 +258,16 @@ void MazeScreen::setSceneData(SceneData *data) {
 
 		this->goal.cell_x = (entrances[1].x + 1) * 2 + 1;
 		this->goal.cell_y = entrances[1].y * 2 + 1;
+		this->maze_complete = -1.0;
+
+		this->begin_x = this->screen_width/2 - (this->maze_data->columns * this->point_size / 2);
+		this->begin_y = (this->screen_height - this->offset_y)/2 + this->offset_y - (this->maze_data->rows * this->point_size / 2);
+
+		this->player.world_x = this->begin_x + this->player.cell_x * this->point_size;
+		this->player.world_y = this->begin_y + this->player.cell_y * this->point_size;
+
+		this->goal.world_x = this->begin_x + this->goal.cell_x * this->point_size;
+		this->goal.world_y = this->begin_y + this->goal.cell_y * this->point_size;
 
 	} else {
 		std::cout << "Incorrect data sent to maze scene: " << data->getType() << std::endl;

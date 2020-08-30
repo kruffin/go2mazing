@@ -1,21 +1,30 @@
 #pragma once
 #include "lib/ugui/ugui.h"
+#include "Sprite.h"
 
 class Player {
 public:
 	int cell_x;
 	int cell_y;
-	int world_x;
-	int world_y;
+	double world_x;
+	double world_y;
 	char width;
 	char height;
 	UG_COLOR color;
+	int animation; // Assumes each set of frameRow is an animation.
 	Player();
 	Player(int x, int y);
 	~Player();
 	void update(double dt, double totalTime);
 	void draw();
+	bool load(std::string imageFilename, int frameCols, int frameRows, int spacing);
+
+	static const int ANIM_LEFT = 2;
+	static const int ANIM_RIGHT = 1;
+	static const int ANIM_UP = 0;
+	static const int ANIM_DOWN = 3;
 
 private:
-	
+	Sprite prill;
+	int currentFrame;
 };

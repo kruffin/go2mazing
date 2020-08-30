@@ -2,6 +2,7 @@
 
 #include "TitleScreen.h"
 #include "Sound.h"
+#include "Drawing.h"
 
 TitleScreen::TitleScreen(int screen_width, int screen_height) {
 	this->x = 20.0;
@@ -23,6 +24,7 @@ TitleScreen::TitleScreen(int screen_width, int screen_height) {
 	this->play_time = -1;
 
 	this->version = std::string("v0.1.0");
+	this->prill = Sprite();
 }
 
 TitleScreen::~TitleScreen() {
@@ -44,8 +46,14 @@ bool TitleScreen::load(std::string programPath) {
 		this->background_frame_count = wav.totalPCMFrameCount;
 		std::cout << "Samples: " << this->background_samples << " Frames: " << this->background_frame_count << std::endl;
 		drwav_uninit(&wav);
-		return true;
 	}
+
+	if (!this->prill.load(programPath + "images/prill.png", 4, 4, 0)) {
+		std::cout << "Failed to load image." << std::endl;
+		return false;
+	}
+
+	return true;
 }
 
 void TitleScreen::update(double dt, double totalTime) {
@@ -107,6 +115,8 @@ void TitleScreen::draw() {
 					  9 * this->version.length(), 10,
 					  2, C_INDIGO);
 	UG_PutString(1, 1, const_cast<char*>(this->version.c_str()));
+
+	KR_blit(20, 20, &this->prill, 0);
 }
 
 bool TitleScreen::handleInput(go2_gamepad_state_t *gamepad) {

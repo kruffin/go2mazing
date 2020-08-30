@@ -27,4 +27,15 @@ private:
 	int max_rows;
 	Player player;
 	Goal goal;
+	Sprite walls;
+	Sprite paths;
+
+	drwav_int16 *bonk_audio;
+	size_t bonk_samples;
+	drwav_uint64 bonk_frame_count;
+
+	double maze_complete;
+
+	short begin_x;
+	short begin_y;
 };

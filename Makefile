@@ -10,7 +10,7 @@ OBJS_cpp= $(patsubst %cpp,%o,$(SRCS))
 OBJS= $(patsubst %c,%o,$(OBJS_cpp))
 
 INCLUDE = -I/usr/local/include/
-LIB = -L/usr/local/lib/ -lgo2 -lopenal
+LIB = -L/usr/local/lib/ -lgo2 -lopenal -lpng
 
 all:$(OBJS)
 	$(CC) $(CXXFLAGS) $(OBJS) -o $(target) $(LIB)
