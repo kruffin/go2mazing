@@ -23,7 +23,7 @@ TitleScreen::TitleScreen(int screen_width, int screen_height) {
 	this->author_text_color = C_GRAY;
 	this->play_time = -1;
 
-	this->version = std::string("v0.1.0");
+	this->version = std::string("v0.2.0");
 	this->prill = Sprite();
 }
 
