@@ -35,6 +35,8 @@ private:
 	drwav_uint64 bonk_frame_count;
 
 	double maze_complete;
+	std::default_random_engine complete_generator;
+	std::uniform_int_distribution<int> complete_dist;
 
 	short begin_x;
 	short begin_y;

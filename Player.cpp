@@ -37,7 +37,7 @@ Player::~Player() {
 
 void Player::update(double dt, double totalTime) {
 
-	this->currentFrame = this->animation * this->prill.frameCols + (int(totalTime) % this->prill.frameCols);
+	this->currentFrame = this->animation * this->prill.frameCols + (int(totalTime * 2) % this->prill.frameCols);
 
 	// std::cout << "current frame: " << this->currentFrame << std::endl;
 };

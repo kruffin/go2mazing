@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ostream>
 #include <algorithm>
+#include <random>
 
 #include "MazeScreen.h"
 #include "Sound.h"
@@ -27,6 +28,8 @@ MazeScreen::MazeScreen(int screen_width, int screen_height) {
 	this->walls = Sprite();
 
 	this->maze_complete = -1.0;
+	this->complete_generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
+	this->complete_dist = std::uniform_int_distribution<int>(0, 6);
 }
 
 MazeScreen::~MazeScreen() {
@@ -37,8 +40,9 @@ MazeScreen::~MazeScreen() {
 
 void MazeScreen::update(double dt, double totalTime) {
 	if (this->maze_complete > 0) {
+		double time_since_complete = double(clock() - this->maze_complete) / double(CLOCKS_PER_SEC);
 
-		if (double(clock() - this->maze_complete) / double(CLOCKS_PER_SEC) > 6.0) {
+		if (time_since_complete > 6.0) {
 			MazeData *data = new MazeData(std::clamp(11 + this->maze_data->level * 2, 1, this->max_cols),
 										  std::clamp(11 + this->maze_data->level * 2, 1, this->max_rows),
 										  this->maze_data->level + 1);
@@ -46,6 +50,16 @@ void MazeScreen::update(double dt, double totalTime) {
 		} else {
 			this->goal.world_x = this->begin_x + this->goal.cell_x * this->point_size + sin(totalTime - this->maze_complete / double(CLOCKS_PER_SEC)) * 10.0;
 			this->goal.world_y += dt * 20.0;
+
+			// chase after the cake
+			if (time_since_complete < 1.0) {
+				this->player.animation = Player::ANIM_RIGHT;
+				this->player.world_x += dt * this->point_size;
+			} else {
+				this->player.animation = Player::ANIM_DOWN;
+
+				this->player.world_y += dt * (15.0 + this->complete_dist(this->complete_generator));				
+			}
 		}
 	}
 
