@@ -54,7 +54,7 @@ void MazeScreen::update(double dt, double totalTime) {
 			// chase after the cake
 			if (time_since_complete < 1.0) {
 				this->player.animation = Player::ANIM_RIGHT;
-				this->player.world_x += dt * this->point_size;
+				this->player.world_x += dt * (this->point_size + 1);
 			} else {
 				this->player.animation = Player::ANIM_DOWN;
 

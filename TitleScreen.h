@@ -5,7 +5,8 @@
 #include "lib/dr_libs/dr_wav.h"
 #include "lib/ugui/ugui.h"
 #include "Scene.h"
-#include "Sprite.h"
+#include "Player.h"
+#include "Goal.h"
 
 class TitleScreen : public Scene {
 public:
@@ -35,5 +36,6 @@ private:
 	drwav_uint64 background_frame_count;
 	clock_t play_time;
 	std::string version;
-	Sprite prill;
+	Player prill;
+	Goal cake;
 };

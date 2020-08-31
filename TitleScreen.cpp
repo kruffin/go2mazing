@@ -24,7 +24,14 @@ TitleScreen::TitleScreen(int screen_width, int screen_height) {
 	this->play_time = -1;
 
 	this->version = std::string("v0.2.0");
-	this->prill = Sprite();
+	this->prill = Player();
+	this->cake = Goal();
+
+	this->prill.world_x = 60.0;
+	this->prill.world_y = 5.0;
+
+	this->cake.world_x = 70.0;
+	this->cake.world_y = 5.0;
 }
 
 TitleScreen::~TitleScreen() {
@@ -49,7 +56,11 @@ bool TitleScreen::load(std::string programPath) {
 	}
 
 	if (!this->prill.load(programPath + "images/prill.png", 4, 4, 0)) {
-		std::cout << "Failed to load image." << std::endl;
+		std::cout << "Failed to load player." << std::endl;
+		return false;
+	}
+	if (!this->cake.load(programPath + "images/cake.png", 4, 1, 0)) {
+		std::cout << "Failed to load cake." << std::endl;
 		return false;
 	}
 
@@ -79,6 +90,9 @@ void TitleScreen::update(double dt, double totalTime) {
 		play_sound(const_cast<short *>(this->background_audio), int(this->background_frame_count));
 		this->play_time = clock();
 	}
+
+	this->prill.update(dt, totalTime);
+	this->cake.update(dt, totalTime);
 }
 
 void TitleScreen::draw() {
@@ -116,7 +130,9 @@ void TitleScreen::draw() {
 					  2, C_INDIGO);
 	UG_PutString(1, 1, const_cast<char*>(this->version.c_str()));
 
-	KR_blit(20, 20, &this->prill, 0);
+	this->prill.draw();
+	this->cake.draw();
+	// KR_blit(20, 20, &this->prill, 0);
 }
 
 bool TitleScreen::handleInput(go2_gamepad_state_t *gamepad) {
