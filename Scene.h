@@ -39,6 +39,7 @@ public:
 	static const char WALL = 'w';
 	static const char PATH = 'p';
 	static const char WALKED = 'x';
+	static const char REWALKED = 'r';
 	static const char UNDEFINED = 'u';
 	int columns;
 	int rows;

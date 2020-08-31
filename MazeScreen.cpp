@@ -105,6 +105,10 @@ void MazeScreen::draw() {
 						path_frame = this->paths.frameCols + (this->maze_data->columns * y + x) % this->paths.frameCols;
 						// c = C_DARK_ORCHID;
 						break;
+					case MazeData::REWALKED:
+						path_frame = this->paths.frameCols * 2 + (this->maze_data->columns * y + x) % this->paths.frameCols;
+						// c = C_DARK_ORCHID;
+						break;
 					case MazeData::UNDEFINED:
 						c = C_BLACK;
 						break;
@@ -141,7 +145,7 @@ bool MazeScreen::load(std::string programPath) {
 	if (!this->walls.load(programPath + "images/walls.png", 8, 1, 0)) {
 		return false;
 	}
-	if (!this->paths.load(programPath + "images/paths.png", 8, 2, 0)) {
+	if (!this->paths.load(programPath + "images/paths.png", 8, 3, 0)) {
 		return false;
 	}
 
@@ -187,14 +191,20 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 
 	if (gamepad->dpad.left) {
 		int new_x = std::clamp(this->player.cell_x - 1, -1, this->maze_data->columns);
-		if (this->maze_data->get(new_x, this->player.cell_y) != MazeData::WALL) {
+		const char floor_tile = this->maze_data->get(new_x, this->player.cell_y);
+		if (floor_tile != MazeData::WALL) {
+			if (MazeData::WALKED != floor_tile) {
+				this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
+			} else {
+				this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::REWALKED);
+			}
+
 			this->player.cell_x = new_x;
 			this->player.animation = Player::ANIM_LEFT;
 
 			this->player.world_x = this->begin_x + this->player.cell_x * this->point_size;
 			this->player.world_y = this->begin_y + this->player.cell_y * this->point_size;
 
-			this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
 		} else {
 			// play bonk
 			play_sound(const_cast<short *>(this->bonk_audio), int(this->bonk_frame_count));
@@ -203,18 +213,26 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 		return true;
 	} else if (gamepad->dpad.right) {
 		int new_x = std::clamp(this->player.cell_x + 1, -1, this->maze_data->columns);
-		if (this->maze_data->get(new_x, this->player.cell_y) != MazeData::WALL) {
+		const char floor_tile = this->maze_data->get(new_x, this->player.cell_y);
+		if (floor_tile != MazeData::WALL) {
+			if (MazeData::WALKED != floor_tile) {
+				if (-1 != this->player.cell_x) {
+					this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
+				}
+			} else {
+				this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::REWALKED);
+			}
+
 			this->player.cell_x = new_x;
 			this->player.animation = Player::ANIM_RIGHT;
 
 			this->player.world_x = this->begin_x + this->player.cell_x * this->point_size;
 			this->player.world_y = this->begin_y + this->player.cell_y * this->point_size;
 
-			this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
-
 			if (new_x == this->goal.cell_x - 1) {
 				// Reached end of maze.
 				this->maze_complete = clock();
+				this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
 			}
 		} else {
 			// play bonk
@@ -224,14 +242,20 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 		return true;
 	} else if (gamepad->dpad.up && -1 != this->player.cell_x) {
 		int new_y = std::clamp(this->player.cell_y - 1, 0, this->maze_data->rows - 1);
-		if (this->maze_data->get(this->player.cell_x, new_y) != MazeData::WALL) {
+		const char floor_tile = this->maze_data->get(this->player.cell_x, new_y);
+		if (floor_tile != MazeData::WALL) {
+			if (MazeData::WALKED != floor_tile) {
+				this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
+			} else {
+				this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::REWALKED);
+			}
+
 			this->player.cell_y = new_y;
 			this->player.animation = Player::ANIM_UP;
 
 			this->player.world_x = this->begin_x + this->player.cell_x * this->point_size;
 			this->player.world_y = this->begin_y + this->player.cell_y * this->point_size;
 
-			this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
 		} else {
 			// play bonk
 			play_sound(const_cast<short *>(this->bonk_audio), int(this->bonk_frame_count));
@@ -240,14 +264,21 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 		return true;
 	} else if (gamepad->dpad.down && -1 != this->player.cell_x) {
 		int new_y = std::clamp(this->player.cell_y + 1, 0, this->maze_data->rows - 1);
-		if (this->maze_data->get(this->player.cell_x, new_y) != MazeData::WALL) {
+		const char floor_tile = this->maze_data->get(this->player.cell_x, new_y);
+		if (floor_tile != MazeData::WALL) {
+			if (MazeData::WALKED != floor_tile) {
+				this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
+			} else {
+				this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::REWALKED);
+			}
+			
+
 			this->player.cell_y = new_y;
 			this->player.animation = Player::ANIM_DOWN;
 
 			this->player.world_x = this->begin_x + this->player.cell_x * this->point_size;
 			this->player.world_y = this->begin_y + this->player.cell_y * this->point_size;
 
-			this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
 		} else {
 			// play bonk
 			play_sound(const_cast<short *>(this->bonk_audio), int(this->bonk_frame_count));
