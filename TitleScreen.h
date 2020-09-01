@@ -1,9 +1,9 @@
 #pragma once
 #include <cstring>
 #include <string>
-#include <go2/input.h>
 #include "lib/dr_libs/dr_wav.h"
 #include "lib/ugui/ugui.h"
+#include "wnd/BaseWnd.h"
 #include "Scene.h"
 #include "Player.h"
 #include "Goal.h"
@@ -15,7 +15,7 @@ public:
 	void update(double dt, double totalTime);
 	void draw();
 	bool load(std::string programPath);
-	bool handleInput(go2_gamepad_state_t *gamepad);
+	bool handleInput(BaseInput *gamepad);
 	void setSceneData(SceneData *data);
 private:
 	double x;

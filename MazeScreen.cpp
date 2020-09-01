@@ -165,7 +165,7 @@ bool MazeScreen::load(std::string programPath) {
 	return true;
 }
 
-bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
+bool MazeScreen::handleInput(BaseInput *gamepad) {
 	if (this->maze_complete > 0) {
 		return false; // Don't allow input
 	}
@@ -189,7 +189,7 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 	// }
 
 
-	if (gamepad->dpad.left) {
+	if (gamepad->left) {
 		int new_x = std::clamp(this->player.cell_x - 1, -1, this->maze_data->columns);
 		const char floor_tile = this->maze_data->get(new_x, this->player.cell_y);
 		if (floor_tile != MazeData::WALL) {
@@ -211,7 +211,7 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 			this->player.animation = Player::ANIM_LEFT;
 		}
 		return true;
-	} else if (gamepad->dpad.right) {
+	} else if (gamepad->right) {
 		int new_x = std::clamp(this->player.cell_x + 1, -1, this->maze_data->columns);
 		const char floor_tile = this->maze_data->get(new_x, this->player.cell_y);
 		if (floor_tile != MazeData::WALL) {
@@ -240,7 +240,7 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 			this->player.animation = Player::ANIM_RIGHT;
 		}
 		return true;
-	} else if (gamepad->dpad.up && -1 != this->player.cell_x) {
+	} else if (gamepad->up && -1 != this->player.cell_x) {
 		int new_y = std::clamp(this->player.cell_y - 1, 0, this->maze_data->rows - 1);
 		const char floor_tile = this->maze_data->get(this->player.cell_x, new_y);
 		if (floor_tile != MazeData::WALL) {
@@ -262,7 +262,7 @@ bool MazeScreen::handleInput(go2_gamepad_state_t *gamepad) {
 			this->player.animation = Player::ANIM_UP;
 		}
 		return true;
-	} else if (gamepad->dpad.down && -1 != this->player.cell_x) {
+	} else if (gamepad->down && -1 != this->player.cell_x) {
 		int new_y = std::clamp(this->player.cell_y + 1, 0, this->maze_data->rows - 1);
 		const char floor_tile = this->maze_data->get(this->player.cell_x, new_y);
 		if (floor_tile != MazeData::WALL) {

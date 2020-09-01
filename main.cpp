@@ -1,6 +1,3 @@
-#include <go2/input.h>
-#include <go2/display.h>
-#include "audio.h"
 #include <drm/drm_fourcc.h>
 
 #include <cstring>
@@ -16,28 +13,16 @@ namespace fs = std::filesystem::__cxx11;
 #include "TitleScreen.h"
 #include "MazeScreen.h"
 #include "Sound.h"
+#include "wnd/Go2LibWnd.h"
 
-void initGo2();
-void destroyGo2();
 void initUgui();
 void destroyUgui();
 bool drawScreen();
-void go2_present();
 void updateLogic();
 void drawErrorScreen(char msg[]);
 
-// libgo2 stuff
-go2_gamepad_state_t outGamepadState;
-go2_display_t* display;
-go2_surface_t* surface;
-go2_presenter_t* presenter;
-go2_input_t* input;
-go2_audio_t* audio;
-
-uint32_t color_format;
-int height;
-int width;
-int bytes_per_pixel;
+Go2LibWnd window = Go2LibWnd();
+BaseInput outGamepadState;
 
 // ugui stuff
 UG_GUI gui;
@@ -68,7 +53,8 @@ int main(int argc, char * argv[]) {
 	progPath.remove_filename();
 
 
-	initGo2();
+	window.init();
+	// initGo2();
 	initUgui();
 	title_screen->load(progPath);
 	maze_screen->load(progPath);
@@ -79,10 +65,11 @@ int main(int argc, char * argv[]) {
 	run_time = clock();
 
 	while(1) {
-		go2_input_gamepad_read(input,&outGamepadState);
-		if (outGamepadState.buttons.f1) {
+		window.getInput(&outGamepadState);
+
+		if (outGamepadState.f1) {
 			std::cout << "f1";
-			destroyGo2();
+			window.destroy();
 			destroyUgui();
 			return 0;
 		}
@@ -110,63 +97,21 @@ int main(int argc, char * argv[]) {
 
 		updateLogic(); // Sets display dirty inside this function.
 		if (dirty_display) {
-			go2_present();
+			window.swapBuffer();
 			dirty_display = false;
 		}
 
 	}
-}
+};
 
-void go2_present() {
-	go2_presenter_post(presenter, surface, 
-						0, 0, width, height,
-						0, 0, width, height,
-						GO2_ROTATION_DEGREES_0);
-}
 
 void play_sound(const short* data, int frames) {
-	go2_audio_submit_fix(audio, data, frames);
-}
-
-void initGo2() {
-	input = go2_input_create();
-
-	display = go2_display_create();
-	presenter = go2_presenter_create(display, DRM_FORMAT_RGB565, 0xff00ff00); // ABGR
-	height = go2_display_height_get(display);
-	width = go2_display_width_get(display);
-    surface = go2_surface_create(display, width, height, DRM_FORMAT_RGB565);
-
-    bytes_per_pixel = go2_drm_format_get_bpp(go2_surface_format_get(surface)) / 8;
-
-    audio = go2_audio_create(44100); // 44.1 kHz
-}
-
-void destroyGo2() {
-	go2_input_destroy(input);
-	//go2_surface_destroy(surface);
-	go2_presenter_destroy(presenter);
-	go2_display_destroy(display);
-	go2_audio_destroy(audio);
-}
+	window.playSound(data, frames);
+};
 
 void go2SetPixel(UG_S16 x, UG_S16 y, UG_COLOR c) {
-	uint8_t* dst = (uint8_t*)go2_surface_map(surface);
-	
-	// swap the x and y while translating x
-	// →[*][ ][ ][ ]
-	//  [ ][ ][ ][ ]
-	// to:
-	//  [ ][*]
-	//  [ ][ ]
-	//  [ ][ ]
-	//  [ ][ ]
-	//      ↑
-
-	UG_S16 yfinal = height - 1 - x;
-	UG_S16 xfinal = y;
-	memcpy(dst + (yfinal * go2_surface_stride_get(surface) + xfinal*bytes_per_pixel), (unsigned char*)&c, sizeof(c));
-}
+	window.setPixel(x, y, (unsigned char *)&c, sizeof(c));
+};
 
 void updateLogic() {
 	clock_t current = clock();
@@ -193,7 +138,7 @@ void updateLogic() {
 		dirty_display = true;
 	}
 	
-}
+};
 
 bool drawScreen() {
 	switch (current_screen) {
@@ -208,7 +153,7 @@ bool drawScreen() {
 			drawErrorScreen(err);
 			return false;
 	}
-}
+};
 
 void drawErrorScreen(char msg[]) {
 	UG_FontSelect(&FONT_8X14);
@@ -216,19 +161,19 @@ void drawErrorScreen(char msg[]) {
 	UG_SetForecolor(C_CRIMSON);
 	UG_SetBackcolor(C_DARK_GOLDEN_ROD);
 	UG_PutString(20, 20, msg);
-}
+};
 
 void initUgui() {
 	// std::cout << "screen width: " << width << ", height: " << height << std::endl;
 	// swap dimensions so ui surface is correct for rotated screen
-	UG_Init(&gui, go2SetPixel, height, width);
-	title_screen = new TitleScreen(height, width);
-	maze_screen = new MazeScreen(height, width);
-}
+	UG_Init(&gui, go2SetPixel, window.getHeight(), window.getWidth());
+	title_screen = new TitleScreen(window.getHeight(), window.getWidth());
+	maze_screen = new MazeScreen(window.getHeight(), window.getWidth());
+};
 
 void destroyUgui() {
 	delete title_screen;
-}
+};
 
 Scene *get_current_screen() {
 	switch(current_screen) {
@@ -239,21 +184,18 @@ Scene *get_current_screen() {
 		default:
 			return (Scene *)NULL;
 	}
-}
+};
 
 void change_scene(SceneType scene, SceneData *data) {
 	// kill audio
-	go2_audio_destroy(audio);
-	audio = go2_audio_create(44100); // 44.1 kHz
+	window.stopSounds();
 
 	// set the scene
 	current_screen = scene;
 	get_current_screen()->setSceneData(data);
 	dirty_display = true;
-}
+};
 
 void KR_blit(int x, int y, Sprite *s, int frame) {
-	uint8_t* dst = (uint8_t*)go2_surface_map(surface);
-
-	s->blit(frame, x, y, dst, go2_surface_stride_get(surface), width, height, bytes_per_pixel*8);
-}
+	window.blit(x, y, s, frame);
+};

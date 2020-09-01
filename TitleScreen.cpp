@@ -135,12 +135,12 @@ void TitleScreen::draw() {
 	// KR_blit(20, 20, &this->prill, 0);
 }
 
-bool TitleScreen::handleInput(go2_gamepad_state_t *gamepad) {
-	if (gamepad->dpad.left || gamepad->dpad.right ||
-		gamepad->dpad.up || gamepad->dpad.down ||
-		gamepad->buttons.a || gamepad->buttons.b ||
-		gamepad->buttons.x || gamepad->buttons.y ||
-		gamepad->buttons.top_left || gamepad->buttons.top_right) {
+bool TitleScreen::handleInput(BaseInput *gamepad) {
+	if (gamepad->left || gamepad->right ||
+		gamepad->up || gamepad->down ||
+		gamepad->a || gamepad->b ||
+		gamepad->x || gamepad->y ||
+		gamepad->lt1 || gamepad->rt1) {
 
 		MazeData *data = new MazeData(11,11,1);
 		change_scene(SCREEN_MAZE, data);

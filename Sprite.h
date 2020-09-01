@@ -1,12 +1,13 @@
 #pragma once
 
 #include <png.h>
+#include <string>
 
 class Sprite {
 public:
 	int frameCols;
 	int frameRows;
-	
+
 	Sprite();
 	~Sprite();
 
