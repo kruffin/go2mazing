@@ -38,4 +38,5 @@ private:
 	std::string version;
 	Player prill;
 	Goal cake;
+	Goal green_key;
 };

@@ -19,8 +19,8 @@ public:
 	void draw();
 	bool load(std::string imageFilename, int frameCols, int frameRows, int spacing);
 
-	static const int ANIM_LEFT = 2;
-	static const int ANIM_RIGHT = 1;
+	static const int ANIM_LEFT = 1;
+	static const int ANIM_RIGHT = 2;
 	static const int ANIM_UP = 0;
 	static const int ANIM_DOWN = 3;
 

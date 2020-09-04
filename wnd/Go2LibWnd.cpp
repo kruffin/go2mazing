@@ -1,6 +1,7 @@
 
 #include <drm/drm_fourcc.h>
 #include <cstring>
+#include <iostream>
 
 #include "Go2LibWnd.h"
 #include "../Sound.h"
@@ -25,6 +26,7 @@ void Go2LibWnd::init() {
     this->bytes_per_pixel = go2_drm_format_get_bpp(go2_surface_format_get(this->surface)) / 8;
 
     this->audio = go2_audio_create(44100); // 44.1 kHz
+    std::cerr << "created audio. Is null? " << (NULL == this->audio) << std::endl;
 };
 
 void Go2LibWnd::destroy() {
@@ -83,11 +85,15 @@ void Go2LibWnd::getInput(BaseInput *input) {
 };
 
 void Go2LibWnd::playSound(const short* data, int frames) {
+	std::cerr << "playing a sound." << std::endl;
 	go2_audio_submit_fix(this->audio, data, frames);
 };
 
 void Go2LibWnd::stopSounds() {
-	go2_audio_destroy(this->audio);
+	std::cerr << "Stoping sounds." << std::endl;
+	if (NULL != this->audio) {
+		go2_audio_destroy(this->audio);
+	}
 	this->audio = go2_audio_create(44100); // 44.1 kHz
 };
 

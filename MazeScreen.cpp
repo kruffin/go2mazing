@@ -12,7 +12,7 @@ MazeScreen::MazeScreen(int screen_width, int screen_height) {
 	this->screen_height = screen_height;
 	this->no_maze_str = std::string("No Maze Loaded.");
 	this->maze_data = NULL;
-	this->point_size = 5;
+	this->point_size = 11;//5;
 	this->offset_y = 50;
 
 	this->max_cols = (this->screen_width - 2*this->point_size) / this->point_size;
@@ -34,7 +34,12 @@ MazeScreen::MazeScreen(int screen_width, int screen_height) {
 
 MazeScreen::~MazeScreen() {
 	if (NULL != this->maze_data) {
+		std::cerr << "Deleting maze data." << std::endl;
 		delete this->maze_data;
+	}
+	if (NULL != this->bonk_audio) {
+		std::cerr << "Freeing bonk audio." << std::endl;
+		free(this->bonk_audio);
 	}
 }
 
@@ -136,16 +141,16 @@ void MazeScreen::draw() {
 }
 
 bool MazeScreen::load(std::string programPath) {
-	if (!this->player.load(programPath + "images/prill.png", 4, 4, 0)) {
+	if (!this->player.load(programPath + "images/candle_11.png", 4, 4, 0)) {
 		return false;
 	}
-	if (!this->goal.load(programPath + "images/cake.png", 4, 1, 0)) {
+	if (!this->goal.load(programPath + "images/cake_11.png", 4, 1, 0)) {
 		return false;
 	}
-	if (!this->walls.load(programPath + "images/walls.png", 8, 1, 0)) {
+	if (!this->walls.load(programPath + "images/walls_11.png", 8, 1, 0)) {
 		return false;
 	}
-	if (!this->paths.load(programPath + "images/paths.png", 8, 3, 0)) {
+	if (!this->paths.load(programPath + "images/paths_11.png", 8, 3, 0)) {
 		return false;
 	}
 

@@ -173,6 +173,7 @@ void initUgui() {
 
 void destroyUgui() {
 	delete title_screen;
+	delete maze_screen;
 };
 
 Scene *get_current_screen() {

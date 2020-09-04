@@ -26,17 +26,22 @@ TitleScreen::TitleScreen(int screen_width, int screen_height) {
 	this->version = std::string("v0.2.0");
 	this->prill = Player();
 	this->cake = Goal();
+	this->green_key = Goal();
 
 	this->prill.world_x = 60.0;
 	this->prill.world_y = 5.0;
 
 	this->cake.world_x = 70.0;
 	this->cake.world_y = 5.0;
+
+	this->green_key.world_x = 80.0;
+	this->green_key.world_y = 5.0;
 }
 
 TitleScreen::~TitleScreen() {
 	delete this->press_text_cycles;
 	if (this->background_audio != NULL) {
+		std::cerr << "Freeing background audio." << std::endl;
 		free(this->background_audio);
 	}
 }
@@ -55,12 +60,16 @@ bool TitleScreen::load(std::string programPath) {
 		drwav_uninit(&wav);
 	}
 
-	if (!this->prill.load(programPath + "images/prill.png", 4, 4, 0)) {
+	if (!this->prill.load(programPath + "images/candle.png", 4, 4, 0)) {
 		std::cout << "Failed to load player." << std::endl;
 		return false;
 	}
 	if (!this->cake.load(programPath + "images/cake.png", 4, 1, 0)) {
 		std::cout << "Failed to load cake." << std::endl;
+		return false;
+	}
+	if (!this->green_key.load(programPath + "images/key.png", 10, 1, 0)) {
+		std::cout << "Failed to load key." << std::endl;
 		return false;
 	}
 
@@ -87,12 +96,13 @@ void TitleScreen::update(double dt, double totalTime) {
 	this->press_text_color = this->press_text_cycles[int(totalTime) % 5];
 	if (-1 == this->play_time || double(clock() - this->play_time) / double(CLOCKS_PER_SEC) > 10.0) {//if (int(totalTime) % 10 == 0) {
 		std::cout << "playing" << std::endl;
-		play_sound(const_cast<short *>(this->background_audio), int(this->background_frame_count));
+		play_sound(const_cast<short *>(this->background_audio), int(this->background_samples));
 		this->play_time = clock();
 	}
 
 	this->prill.update(dt, totalTime);
 	this->cake.update(dt, totalTime);
+	this->green_key.update(dt, totalTime);
 }
 
 void TitleScreen::draw() {
@@ -132,6 +142,7 @@ void TitleScreen::draw() {
 
 	this->prill.draw();
 	this->cake.draw();
+	this->green_key.draw();
 	// KR_blit(20, 20, &this->prill, 0);
 }
 
