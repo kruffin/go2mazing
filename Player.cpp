@@ -48,6 +48,9 @@ bool Player::load(std::string imageFilename, int frameCols, int frameRows, int s
 		return false;
 	}
 
+	this->width = this->prill.frameWidth;
+	this->height = this->prill.frameHeight;
+
 	return true;
 }
 

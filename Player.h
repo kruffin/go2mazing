@@ -8,8 +8,8 @@ public:
 	int cell_y;
 	double world_x;
 	double world_y;
-	char width;
-	char height;
+	int width;
+	int height;
 	UG_COLOR color;
 	int animation; // Assumes each set of frameRow is an animation.
 	Player();

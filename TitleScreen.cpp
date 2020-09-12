@@ -27,6 +27,7 @@ TitleScreen::TitleScreen(int screen_width, int screen_height) {
 	this->prill = Player();
 	this->cake = Goal();
 	this->green_key = Goal();
+	this->green_door = Goal();
 
 	this->prill.world_x = 60.0;
 	this->prill.world_y = 5.0;
@@ -36,6 +37,9 @@ TitleScreen::TitleScreen(int screen_width, int screen_height) {
 
 	this->green_key.world_x = 80.0;
 	this->green_key.world_y = 5.0;
+
+	this->green_door.world_x = 90.0;
+	this->green_door.world_y = 5.0;
 }
 
 TitleScreen::~TitleScreen() {
@@ -72,6 +76,10 @@ bool TitleScreen::load(std::string programPath) {
 		std::cout << "Failed to load key." << std::endl;
 		return false;
 	}
+	if (!this->green_door.load(programPath + "images/door.png", 11, 1, 0)) {
+		std::cout << "Failed to load door." << std::endl;
+		return false;
+	}
 
 	return true;
 }
@@ -103,6 +111,7 @@ void TitleScreen::update(double dt, double totalTime) {
 	this->prill.update(dt, totalTime);
 	this->cake.update(dt, totalTime);
 	this->green_key.update(dt, totalTime);
+	this->green_door.update(dt, totalTime);
 }
 
 void TitleScreen::draw() {
@@ -143,6 +152,7 @@ void TitleScreen::draw() {
 	this->prill.draw();
 	this->cake.draw();
 	this->green_key.draw();
+	this->green_door.draw();
 	// KR_blit(20, 20, &this->prill, 0);
 }
 

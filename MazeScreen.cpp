@@ -26,6 +26,7 @@ MazeScreen::MazeScreen(int screen_width, int screen_height) {
 	this->player = Player(0,0);
 	this->goal = Goal(0,0);
 	this->walls = Sprite();
+	this->exit = Goal();
 
 	this->maze_complete = -1.0;
 	this->complete_generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
@@ -68,7 +69,7 @@ void MazeScreen::update(double dt, double totalTime) {
 		}
 	}
 
-
+	this->exit.update(dt, totalTime);
 	this->player.update(dt, totalTime);
 	this->goal.update(dt, totalTime);
 }
@@ -135,6 +136,7 @@ void MazeScreen::draw() {
 			}
 		}
 
+		this->exit.draw();
 		this->player.draw();
 		this->goal.draw();
 	}
@@ -153,6 +155,10 @@ bool MazeScreen::load(std::string programPath) {
 	if (!this->paths.load(programPath + "images/paths_11.png", 8, 3, 0)) {
 		return false;
 	}
+	if (!this->exit.load(programPath + "images/exit_33.png", 1, 1, 0)) {
+		return false;
+	}
+
 
 	drwav wav;
 	if (!drwav_init_file(&wav, (programPath + "sounds/bonk.wav").c_str(), NULL)) {
@@ -318,6 +324,13 @@ void MazeScreen::setSceneData(SceneData *data) {
 
 		this->goal.world_x = this->begin_x + this->goal.cell_x * this->point_size;
 		this->goal.world_y = this->begin_y + this->goal.cell_y * this->point_size;
+
+		this->exit.world_x = this->goal.world_x;
+		this->exit.world_y = std::max(double(this->begin_y), this->goal.world_y + (this->goal.height / 2) - (this->exit.height / 2));
+
+		std::cout << "goal world pos: (" << this->goal.world_x << ", " << this->goal.world_y << ")" << std::endl;
+		std::cout << "exit world pos: (" << this->exit.world_x << ", " << this->exit.world_y << ")" << std::endl;
+		std::cout << "exit dimensions: (" << this->exit.width << ", " << this->exit.height << ")" << std::endl;
 
 	} else {
 		std::cout << "Incorrect data sent to maze scene: " << data->getType() << std::endl;

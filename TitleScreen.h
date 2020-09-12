@@ -39,4 +39,5 @@ private:
 	Player prill;
 	Goal cake;
 	Goal green_key;
+	Goal green_door;
 };

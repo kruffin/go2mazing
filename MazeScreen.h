@@ -29,6 +29,7 @@ private:
 	Goal goal;
 	Sprite walls;
 	Sprite paths;
+	Goal exit;
 
 	drwav_int16 *bonk_audio;
 	size_t bonk_samples;
