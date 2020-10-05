@@ -3,6 +3,7 @@
 #include "TitleScreen.h"
 #include "Sound.h"
 #include "Drawing.h"
+#include "MazeData.h"
 
 TitleScreen::TitleScreen(int screen_width, int screen_height) {
 	this->x = 20.0;

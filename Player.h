@@ -1,4 +1,6 @@
 #pragma once
+
+#include <iostream>
 #include "lib/ugui/ugui.h"
 #include "Sprite.h"
 
@@ -12,6 +14,7 @@ public:
 	int height;
 	UG_COLOR color;
 	int animation; // Assumes each set of frameRow is an animation.
+	std::string keys; // Holds a list of keys obtained.
 	Player();
 	Player(int x, int y);
 	~Player();

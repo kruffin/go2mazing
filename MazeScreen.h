@@ -1,11 +1,13 @@
 #include <cstring>
 #include <string>
+#include <random>
 #include "lib/dr_libs/dr_wav.h"
 #include "lib/ugui/ugui.h"
 #include "wnd/BaseWnd.h"
 #include "Scene.h"
 #include "Player.h"
 #include "Goal.h"
+#include "MazeData.h"
 
 class MazeScreen : public Scene {
 public:
@@ -30,6 +32,8 @@ private:
 	Sprite walls;
 	Sprite paths;
 	Goal exit;
+	Goal tree;
+	Goal entrance;
 
 	drwav_int16 *bonk_audio;
 	size_t bonk_samples;
@@ -41,4 +45,6 @@ private:
 
 	short begin_x;
 	short begin_y;
+
+	void movePLayer(int new_x, int new_y, int direction);
 };
