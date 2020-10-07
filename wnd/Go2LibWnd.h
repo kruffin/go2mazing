@@ -1,4 +1,5 @@
 #pragma once
+#ifndef USE_GLFW
 #include <go2/input.h>
 #include <go2/display.h>
 #include "../audio.h"
@@ -33,3 +34,4 @@ public:
 	int width;
 	int bytes_per_pixel;
 };
+#endif

@@ -12,17 +12,33 @@ Pull down the submodules.
     git submodule update --init --recursive
 
 ### Prereqs
-This requires the libgo2 library from: https://github.com/OtherCrashOverride/libgo2 It should already be on the ODroid Go Advance.
+There are two ways to build this program:
 
-It also requires the following packages:
+1. To run directly on the Go Advance.
+2. To run on a GLFW compatible computer.
+
+#### 0. Common
+The following packages are required:
 
     build-essential libopenal-dev
 
+#### 1. Go Advance Prereqs
+This requires the libgo2 library from: https://github.com/OtherCrashOverride/libgo2 It should already be on the ODroid Go Advance.
+
 To build the application run:
 
-    make
+    make go2
 
-## Install
+#### 2. GLFW
+Requires the additional package:
+
+    libglfw3-dev
+
+To build run:
+
+    make glfw
+
+## Install on Go Advance
 
 Clone the repo and copy over to the go advance (or clone directly on the go advance). Do the build.
 

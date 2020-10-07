@@ -13,7 +13,11 @@ namespace fs = std::filesystem::__cxx11;
 #include "TitleScreen.h"
 #include "MazeScreen.h"
 #include "Sound.h"
-#include "wnd/Go2LibWnd.h"
+#ifdef USE_GLFW
+	#include "wnd/GlfwWnd.h"
+#else
+	#include "wnd/Go2LibWnd.h"
+#endif
 
 void initUgui();
 void destroyUgui();
@@ -21,7 +25,14 @@ bool drawScreen();
 void updateLogic();
 void drawErrorScreen(char msg[]);
 
-Go2LibWnd window = Go2LibWnd();
+#ifdef USE_GLFW
+BaseWnd *window = new GlfwWnd();
+void frame_buffer_size_changed(GLFWwindow *inWindow, int width, int height) {
+	((GlfwWnd *)window)->frameBufferSizeChanged(inWindow, width, height);
+};
+#else
+BaseWnd *window = new Go2LibWnd();
+#endif
 BaseInput outGamepadState;
 
 // ugui stuff
@@ -41,7 +52,7 @@ clock_t run_time;
 // Scene management
 SceneType current_screen = SCREEN_TITLE;
 TitleScreen *title_screen;
-MazeScreen * maze_screen;
+MazeScreen *maze_screen;
 
 
 clock_t last_draw_time;
@@ -53,7 +64,7 @@ int main(int argc, char * argv[]) {
 	progPath.remove_filename();
 
 
-	window.init();
+	window->init();
 	// initGo2();
 	initUgui();
 	title_screen->load(progPath);
@@ -65,12 +76,13 @@ int main(int argc, char * argv[]) {
 	run_time = clock();
 
 	while(1) {
-		window.getInput(&outGamepadState);
+		window->getInput(&outGamepadState);
 
 		if (outGamepadState.f1) {
 			std::cout << "f1";
-			window.destroy();
+			window->destroy();
 			destroyUgui();
+			delete window;
 			return 0;
 		}
 		current_press = clock();
@@ -97,7 +109,7 @@ int main(int argc, char * argv[]) {
 
 		updateLogic(); // Sets display dirty inside this function.
 		if (dirty_display) {
-			window.swapBuffer();
+			window->swapBuffer();
 			dirty_display = false;
 		}
 
@@ -106,11 +118,11 @@ int main(int argc, char * argv[]) {
 
 
 void play_sound(const short* data, int frames) {
-	window.playSound(data, frames);
+	window->playSound(data, frames);
 };
 
 void go2SetPixel(UG_S16 x, UG_S16 y, UG_COLOR c) {
-	window.setPixel(x, y, (unsigned char *)&c, sizeof(c));
+	window->setPixel(x, y, (unsigned char *)&c, sizeof(c));
 };
 
 void updateLogic() {
@@ -166,9 +178,9 @@ void drawErrorScreen(char msg[]) {
 void initUgui() {
 	// std::cout << "screen width: " << width << ", height: " << height << std::endl;
 	// swap dimensions so ui surface is correct for rotated screen
-	UG_Init(&gui, go2SetPixel, window.getHeight(), window.getWidth());
-	title_screen = new TitleScreen(window.getHeight(), window.getWidth());
-	maze_screen = new MazeScreen(window.getHeight(), window.getWidth());
+	UG_Init(&gui, go2SetPixel, window->getHeight(), window->getWidth());
+	title_screen = new TitleScreen(window->getHeight(), window->getWidth());
+	maze_screen = new MazeScreen(window->getHeight(), window->getWidth());
 };
 
 void destroyUgui() {
@@ -189,7 +201,7 @@ Scene *get_current_screen() {
 
 void change_scene(SceneType scene, SceneData *data) {
 	// kill audio
-	window.stopSounds();
+	window->stopSounds();
 
 	// set the scene
 	current_screen = scene;
@@ -198,5 +210,5 @@ void change_scene(SceneType scene, SceneData *data) {
 };
 
 void KR_blit(int x, int y, Sprite *s, int frame) {
-	window.blit(x, y, s, frame);
+	window->blit(x, y, s, frame);
 };

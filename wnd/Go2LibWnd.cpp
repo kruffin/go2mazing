@@ -1,3 +1,4 @@
+#ifndef USE_GLFW
 
 #include <drm/drm_fourcc.h>
 #include <cstring>
@@ -104,3 +105,5 @@ int Go2LibWnd::getWidth() {
 int Go2LibWnd::getHeight() {
 	return this->height;
 }
+
+#endif

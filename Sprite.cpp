@@ -177,3 +177,24 @@ void Sprite::blit(int frame, int x, int y, uint8_t*dest, int stride, int dest_wi
 	}
 	
 };
+
+Sprite::Pixel Sprite::getPixel(int frame, int x, int y) {
+	if (NULL == this->data) {
+		return Sprite::Pixel { 0, 0 };
+	}
+
+	int frame_row = frame / this->frameCols;
+	int frame_col = frame - frame_row * this->frameCols;
+	int src_start_x = frame_col * this->frameWidth + frame_col * this->frameSpacingPixels;
+	int src_start_y = frame_row * this->frameHeight + frame_row * this->frameSpacingPixels;
+	// int src_end_y = src_start_y + this->frameHeight - 1;
+
+	png_bytep cur_pixel = this->data + (src_start_y + y) * this->rowBytes + (src_start_x + x) * 4;
+
+	uint16_t rgb565;
+	rgb565 = 	((cur_pixel[0] & 0b11111000) << 8) + 
+				((cur_pixel[1] & 0b11111100) << 3) +
+				(cur_pixel[2] >> 3);
+
+	return Sprite::Pixel { rgb565, cur_pixel[3] };
+};
