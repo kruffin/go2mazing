@@ -45,6 +45,7 @@ private:
 	GLuint program;
 
 	GLint posLocation;
+	GLint texLocation;
 
 	static const char *vertex_shader_text;
 	static const char *frag_shader_text;

@@ -11,10 +11,14 @@ const char *GlfwWnd::vertex_shader_text =
 	"#version 130\n"
 	"precision highp float;\n"
 	"in vec2 pos;\n"
+	"in vec2 intexcoord;\n"
 	"out vec2 texcoord;\n"
 	"void main() {\n"
 	"	gl_Position = vec4(pos, 0.0, 1.0);\n"
-	"	texcoord = pos * 0.5 + 0.5; //change to [0,1]\n"
+	"	texcoord = intexcoord;\n"
+	"	// rotate the texture coords.\n"
+	"	//texcoord.x = pos.y * 0.5 + 0.5; //change to [0,1]\n"
+	"	//texcoord.y = pos.x * 0.5 + 0.5;\n"
 	"}\n";
 
 const char *GlfwWnd::frag_shader_text = 
@@ -98,10 +102,10 @@ void GlfwWnd::init() {
 		// -1.0f, -1.0f,
 		// 1.0f, -1.0f
 
-		-1.0f, 1.0f,
-		-1.0f, -1.0f,
-		1.0f, 1.0f,
-		1.0f, -1.0f
+		-1.0f,	1.0f,	1.0f,	1.0f, 
+		-1.0f,	-1.0f,	0.0f,	1.0f,
+		1.0f,	1.0f,	1.0f,	0.0f,
+		1.0f,	-1.0f,	0.0f,	0.0f
 	};
 	glGenVertexArrays(1, &this->vao);
 	glBindVertexArray(this->vao);
@@ -111,7 +115,11 @@ void GlfwWnd::init() {
 
 	this->posLocation = glGetAttribLocation(this->program, "pos");
 	glEnableVertexAttribArray(this->posLocation);
-	glVertexAttribPointer(this->posLocation, 2, GL_FLOAT, GL_FALSE, 0, (const GLubyte *)0);
+	glVertexAttribPointer(this->posLocation, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void *)0);
+
+	this->texLocation = glGetAttribLocation(this->program, "intexcoord");
+	glEnableVertexAttribArray(this->texLocation);
+	glVertexAttribPointer(this->texLocation, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void *)(2*sizeof(float)));
 
 	glBindVertexArray(0);
 
@@ -181,7 +189,7 @@ void GlfwWnd::swapBuffer() {
 
 	glBindVertexArray(this->vao);
 
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 8);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
