@@ -67,7 +67,7 @@ void GlfwWnd::init() {
 		return;
 	}
 
-	this->window = glfwCreateWindow(this->width, this->height, "Go2Mazing", NULL, NULL);
+	this->window = glfwCreateWindow(this->height, this->width, "Go2Mazing", NULL, NULL);
 	glfwMakeContextCurrent(this->window);
 	gladLoadGL();
 	glfwSetFramebufferSizeCallback(this->window, frame_buffer_size_changed);
@@ -158,8 +158,22 @@ void GlfwWnd::blit(int x, int y, Sprite *s, int frame) {
 		for (int sx = 0; sx < s->frameWidth; ++sx) {
 			Sprite::Pixel cur = s->getPixel(frame, sx, sy);
 			if (cur.alpha == 0) { continue; }
-			int fy = (this->height-1-x+s->frameWidth-sx);
-			int fx = (this->width-1-y+s->frameHeight-sy);
+			// Takes a picture like this
+			// [c][d][e]
+			// [ ][ ][ ]
+			// [ ][ ][*]
+			// then rotates it since the go2 screen is long ways; keep this in since this flipping is needed
+			// somewhere in the common code. TODO: investigate so this gets simpler.
+			// [ ][ ][c]
+			// [ ][ ][d]
+			// [*][ ][e]
+			// and flips it since onpengl textures start at the bottom-left
+			// [*][ ][e]
+			// [ ][ ][d]
+			// [ ][ ][c]
+			
+			int fy = (this->height-1 -x+ (s->frameWidth -sx));
+			int fx = (this->width-1 -y+ (s->frameHeight -sy));
 			if (fy < 0 || fx < 0 || fy >= this->height || fx >= this->width) {
 				continue;
 			}

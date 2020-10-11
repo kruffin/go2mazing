@@ -127,6 +127,9 @@ void MazeScreen::draw() {
 						path_frame = this->paths.frameCols * 3 + (this->maze_data->columns * y + x) % this->paths.frameCols;
 						// c = C_DARK_ORCHID;
 						break;
+					case MazeData::WALKED_GREEN_KEY:
+						path_frame = this->paths.frameCols * 4 + (this->maze_data->columns * y + x) % this->paths.frameCols;
+						break;
 					case MazeData::UNDEFINED:
 						c = C_BLACK;
 						break;
@@ -166,7 +169,7 @@ bool MazeScreen::load(std::string programPath) {
 	if (!this->walls.load(programPath + "images/walls_11.png", 8, 1, 0)) {
 		return false;
 	}
-	if (!this->paths.load(programPath + "images/paths_11.png", 8, 4, 0)) {
+	if (!this->paths.load(programPath + "images/paths_11.png", 8, 5, 0)) {
 		return false;
 	}
 	if (!this->exit.load(programPath + "images/exit_33.png", 1, 2, 0)) {
@@ -198,22 +201,28 @@ bool MazeScreen::load(std::string programPath) {
 
 void MazeScreen::movePLayer(int new_x, int new_y, int direction) {
 	const char floor_tile = this->maze_data->get(new_x, new_y);
+	const char old_floor_tile = this->maze_data->get(this->player.cell_x, this->player.cell_y);
 
-	if (floor_tile != MazeData::WALL && (floor_tile != MazeData::DOOR_GREEN || this->player.keys.find(MazeData::KEY_GREEN) != std::string::npos)) {
+	std::cout << "old tile (" << this->player.cell_x << ", " << this->player.cell_y << ") new tile: (" << new_x << ", " << new_y << ")" << std::endl;
+	if (floor_tile != MazeData::WALL 
+		&& 
+		(floor_tile != MazeData::DOOR_GREEN || this->player.keys.find(MazeData::KEY_GREEN) != std::string::npos)) {
 		// only overwrite these particular tiles
-		if (MazeData::PATH == floor_tile || MazeData::WALKED == floor_tile || MazeData::REWALKED == floor_tile) { 
-			if (MazeData::WALKED != floor_tile) {
-				// The player starts off the maze so don't try to fill the first move.
-				if (-1 != this->player.cell_x) {
-					this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::WALKED);
-				}
-			} else {
-				this->maze_data->set(this->player.cell_x, this->player.cell_y, MazeData::REWALKED);
+
+		this->maze_data->replaceAllTiles(MazeData::WALKED, MazeData::REWALKED);
+		std::deque<MazeData::maze_cell> walkPath = this->maze_data->findPath(new_x, new_y);
+		for(int i = 0; i < walkPath.size(); ++i) {
+			MazeData::maze_cell c = walkPath[i];
+			const char tile = this->maze_data->get(c.x, c.y);
+			if (MazeData::REWALKED == tile || MazeData::PATH == tile) {
+				this->maze_data->set(c.x, c.y, MazeData::WALKED);
 			}
 		}
 
 		if (MazeData::KEY_GREEN == floor_tile) {
 			this->player.keys += MazeData::KEY_GREEN;
+			// Color path green
+			this->maze_data->replaceAllTiles(MazeData::WALKED, MazeData::WALKED_GREEN_KEY);
 		}
 
 		this->player.cell_x = new_x;

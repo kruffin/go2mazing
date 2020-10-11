@@ -9,6 +9,7 @@ public:
 	static const char WALL = 'w';
 	static const char PATH = ' ';
 	static const char WALKED = 'x';
+	static const char WALKED_GREEN_KEY = 'o';
 	static const char REWALKED = 'r';
 	static const char KEY_GREEN = 'g';
 	static const char DOOR_GREEN = 'G';
@@ -25,6 +26,8 @@ public:
 	void set(int x, int y, char val);
 	int getComplexity(int x, int y);
 	void setComplexity(int x, int y, int val);
+
+	void replaceAllTiles(char toReplace, char replaceWith);
 
 	struct maze_cell {
 		int x;

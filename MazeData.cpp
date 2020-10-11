@@ -49,20 +49,28 @@ void MazeData::freeGraph(MazeData::complexity_cell *graph) {
 
 int MazeData::getType() {
 	return SceneData::TYPE_SCENE_MAZE;
-}
+};
 char MazeData::get(int x, int y) {
 	return this->maze[x + y*columns];
-}
+};
 void MazeData::set(int x, int y, char val) {
 	this->maze[x + y*columns] = val;
-}
+};
 
 int MazeData::getComplexity(int x, int y) {
 	return this->complexity[x + y*columns];
-}
+};
 void MazeData::setComplexity(int x, int y, int val) {
 	this->complexity[x + y*columns] = val;
-}
+};
+
+void MazeData::replaceAllTiles(char toReplace, char replaceWith) {
+	for (int idx = 0; idx < rows*columns; ++idx) {
+		if (this->maze[idx] == toReplace) {
+			this->maze[idx] = replaceWith;
+		}
+	}
+};
 
 // Expects a two element array input.
 void MazeData::generate(maze_cell *entrances) {
@@ -298,7 +306,7 @@ void MazeData::printGraph(MazeData::complexity_cell *cur, int indent) {
 	for (int c = 0; c < cur->children.size(); ++c) {
 		printGraph(cur->children[c], indent + 1);
 	}
-}
+};
 
 std::deque<MazeData::maze_cell> MazeData::findPath(int x, int y) {
 	return this->findPath(x, y, this->graph);
