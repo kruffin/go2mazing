@@ -1,6 +1,10 @@
 #include <cstdio>
 #include <cstddef>
 #include <unistd.h>
+
+#include <cstdlib>
+#include <cstring>
+
 #include "audio.h"
 #include "Sound.h"
 
@@ -74,3 +78,82 @@ void go2_audio_submit_fix(go2_audio_t* audio, const short* data, int frames)
         alSourcePlay(audio->source);
     }
 }
+
+go2_audio_t* go2_audio_create(int frequency)
+{
+    const int BUFFER_COUNT = 4;
+    go2_audio_t* result = (go2_audio_t *)malloc(sizeof(*result));
+    if (!result)
+    {
+        printf("malloc failed.\n");
+        goto out;
+    }
+
+    memset(result, 0, sizeof(*result));
+
+
+    result->frequency = frequency;
+
+    result->device = alcOpenDevice(NULL);
+    if (!result->device)
+    {
+        printf("alcOpenDevice failed.\n");
+        goto err_00;
+    }
+
+    result->context = alcCreateContext(result->device, NULL);
+    if (!alcMakeContextCurrent(result->context))
+    {
+        printf("alcMakeContextCurrent failed.\n");
+        goto err_01;
+    }
+
+    alGenSources((ALuint)1, &result->source);
+
+    alSourcef(result->source, AL_PITCH, 1);
+    alSourcef(result->source, AL_GAIN, 1);
+    alSource3f(result->source, AL_POSITION, 0, 0, 0);
+    alSource3f(result->source, AL_VELOCITY, 0, 0, 0);
+    alSourcei(result->source, AL_LOOPING, AL_FALSE);
+
+    //memset(audioBuffer, 0, AUDIOBUFFER_LENGTH * sizeof(short));
+
+    for (int i = 0; i < BUFFER_COUNT; ++i)
+    {
+        ALuint buffer;
+        alGenBuffers((ALuint)1, &buffer);
+        alBufferData(buffer, AL_FORMAT_STEREO16, NULL, 0, frequency);
+        alSourceQueueBuffers(result->source, 1, &buffer);
+    }
+
+    alSourcePlay(result->source);
+
+    result->isAudioInitialized = true;
+
+    // testing
+    //uint32_t vol = go2_audio_volume_get(result);
+    //printf("audio: vol=%d\n", vol);
+    //go2_audio_path_get(result);
+
+
+    return result;
+
+
+err_01:
+    alcCloseDevice(result->device);
+
+err_00:
+    free(result);
+
+out:
+    return NULL;
+};
+
+void go2_audio_destroy(go2_audio_t* audio)
+{
+    alDeleteSources(1, &audio->source);
+    alcDestroyContext(audio->context);
+    alcCloseDevice(audio->device);
+
+    free(audio);
+};

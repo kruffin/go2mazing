@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "BaseWnd.h"
+#include "../audio.h"
 
 class GlfwWnd : public BaseWnd {
 public:
@@ -49,6 +50,8 @@ private:
 
 	static const char *vertex_shader_text;
 	static const char *frag_shader_text;
+
+	go2_audio_t* audio;
 };
 
 

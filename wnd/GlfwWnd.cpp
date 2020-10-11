@@ -6,6 +6,7 @@
 
 #include "../lib/glad/glad.h"
 #include "GlfwWnd.h"
+#include "../Sound.h"
 
 const char *GlfwWnd::vertex_shader_text = 
 	"#version 130\n"
@@ -66,6 +67,8 @@ void GlfwWnd::init() {
 		std::cerr << "Failed to initialize GLFW." << std::endl;
 		return;
 	}
+
+	this->audio = go2_audio_create(44100); // 44.1 kHz
 
 	this->window = glfwCreateWindow(this->height, this->width, "Go2Mazing", NULL, NULL);
 	glfwMakeContextCurrent(this->window);
@@ -132,6 +135,7 @@ void GlfwWnd::destroy() {
 		this->window = NULL;
 	}
 	glfwTerminate();
+	go2_audio_destroy(this->audio);
 };
 
 void GlfwWnd::frameBufferSizeChanged(GLFWwindow *window, int width, int height) {
@@ -223,11 +227,15 @@ void GlfwWnd::getInput(BaseInput *input) {
 };
 
 void GlfwWnd::playSound(const short* data, int frames) {
-
+	// std::cout << "submitting sound with " << frames << " frames." << std::endl;
+	go2_audio_submit_fix(this->audio, data, frames);
 };
 
 void GlfwWnd::stopSounds() {
-
+	if (NULL != this->audio) {
+		go2_audio_destroy(this->audio);
+	}
+	this->audio = go2_audio_create(44100); // 44.1 kHz
 };
 
 int GlfwWnd::getWidth() {

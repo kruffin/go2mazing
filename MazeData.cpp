@@ -314,7 +314,7 @@ std::deque<MazeData::maze_cell> MazeData::findPath(int x, int y) {
 
 std::deque<MazeData::maze_cell> MazeData::findPath(int x, int y, MazeData::complexity_cell *cur) {
 	if (cur->x == x && cur->y == y) {
-		std::cout << "found cell (" << x << ", " << y << ")" << std::endl;
+		// std::cout << "found cell (" << x << ", " << y << ")" << std::endl;
 		std::deque<MazeData::maze_cell> path;
 		path.push_front({cur->x, cur->y});
 		return path;

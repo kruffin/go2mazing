@@ -27,7 +27,7 @@ public:
 	static const int ANIM_UP = 0;
 	static const int ANIM_DOWN = 3;
 
-private:
+protected:
 	Sprite prill;
 	int currentFrame;
 };

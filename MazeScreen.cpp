@@ -29,6 +29,8 @@ MazeScreen::MazeScreen(int screen_width, int screen_height) {
 	this->exit = Goal();
 	this->tree = Goal();
 	this->entrance = Goal();
+	this->green_door = Goal();
+	this->green_key = Key();
 
 	this->maze_complete = -1.0;
 	this->complete_generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
@@ -76,6 +78,8 @@ void MazeScreen::update(double dt, double totalTime) {
 	this->exit.update(dt, totalTime);
 	this->player.update(dt, totalTime);
 	this->goal.update(dt, totalTime);
+	this->green_door.update(dt, totalTime);
+	this->green_key.update(dt, totalTime);
 }
 
 void MazeScreen::draw() {
@@ -154,6 +158,10 @@ void MazeScreen::draw() {
 		this->entrance.draw();
 		this->tree.draw();
 		this->exit.draw();
+		this->green_door.draw();
+		// if (this->player.keys.find(MazeData::KEY_GREEN) == std::string::npos) {
+		this->green_key.draw();
+		// }
 		this->player.draw();
 		this->goal.draw();
 	}
@@ -181,6 +189,12 @@ bool MazeScreen::load(std::string programPath) {
 	if (!this->tree.load(programPath + "images/trees1_22.png", 4, 1, 0)) {
 		return false;
 	}
+	if (!this->green_door.load(programPath + "images/door_11.png", 18, 1, 0)) {
+		return false;
+	}
+	if (!this->green_key.load(programPath + "images/key_11.png", 10, 1, 0)) {
+		return false;
+	}
 
 
 	drwav wav;
@@ -203,7 +217,7 @@ void MazeScreen::movePLayer(int new_x, int new_y, int direction) {
 	const char floor_tile = this->maze_data->get(new_x, new_y);
 	const char old_floor_tile = this->maze_data->get(this->player.cell_x, this->player.cell_y);
 
-	std::cout << "old tile (" << this->player.cell_x << ", " << this->player.cell_y << ") new tile: (" << new_x << ", " << new_y << ")" << std::endl;
+	// std::cout << "old tile (" << this->player.cell_x << ", " << this->player.cell_y << ") new tile: (" << new_x << ", " << new_y << ")" << std::endl;
 	if (floor_tile != MazeData::WALL 
 		&& 
 		(floor_tile != MazeData::DOOR_GREEN || this->player.keys.find(MazeData::KEY_GREEN) != std::string::npos)) {
@@ -221,8 +235,14 @@ void MazeScreen::movePLayer(int new_x, int new_y, int direction) {
 
 		if (MazeData::KEY_GREEN == floor_tile) {
 			this->player.keys += MazeData::KEY_GREEN;
+			this->green_key.obtained = true;
 			// Color path green
 			this->maze_data->replaceAllTiles(MazeData::WALKED, MazeData::WALKED_GREEN_KEY);
+		}
+
+		if (MazeData::DOOR_GREEN == floor_tile) {
+			// We walked on the door; make it opened.
+			this->green_door.hidden = true;
 		}
 
 		this->player.cell_x = new_x;
@@ -326,6 +346,27 @@ void MazeScreen::setSceneData(SceneData *data) {
 		this->entrance.world_y = std::max(double(this->begin_y), 
 										this->player.world_y + (this->player.height / 2) - (this->entrance.height / 2));
 		this->entrance.animation = 1;
+
+		int door_x = 0, door_y = 0;
+		int key_x = 0, key_y = 0;
+		for (int x = 0; x < this->maze_data->columns; ++x) {
+			for (int y = 0; y < this->maze_data->rows; ++y) {
+				const char tile = this->maze_data->get(x, y);
+				if (MazeData::DOOR_GREEN == tile) {
+					door_x = x;
+					door_y = y;
+				} else if (MazeData::KEY_GREEN == tile) {
+					key_x = x;
+					key_y = y;
+				}
+			}
+		}
+		this->green_door.world_x = this->begin_x + door_x * this->point_size;
+		this->green_door.world_y = this->begin_y + door_y * this->point_size;
+		this->green_door.hidden = false;
+		this->green_key.world_x = this->begin_x + key_x * this->point_size;
+		this->green_key.world_y = this->begin_y + key_y * this->point_size;
+		this->green_key.obtained = false;
 		std::cout << "goal world pos: (" << this->goal.world_x << ", " << this->goal.world_y << ")" << std::endl;
 		std::cout << "exit world pos: (" << this->exit.world_x << ", " << this->exit.world_y << ")" << std::endl;
 		std::cout << "exit dimensions: (" << this->exit.width << ", " << this->exit.height << ")" << std::endl;

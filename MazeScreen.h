@@ -7,6 +7,7 @@
 #include "Scene.h"
 #include "Player.h"
 #include "Goal.h"
+#include "Key.h"
 #include "MazeData.h"
 
 class MazeScreen : public Scene {
@@ -34,6 +35,8 @@ private:
 	Goal exit;
 	Goal tree;
 	Goal entrance;
+	Key green_key;
+	Goal green_door;
 
 	drwav_int16 *bonk_audio;
 	size_t bonk_samples;
