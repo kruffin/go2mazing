@@ -334,11 +334,11 @@ std::deque<MazeData::maze_cell> MazeData::findPath(int x, int y, MazeData::compl
 bool MazeData::placeDoorAndKey(std::deque<MazeData::maze_cell> path) {
 
 	// Find the spot in the middle to add the door.
-	maze_cell door_pos = path[path.size() / 2 - 1];
+	maze_cell door_pos = path[path.size() - 1];// / 2 - 1];
 	this->set(door_pos.x, door_pos.y, MazeData::DOOR_GREEN);
 
 	// Walk backwards and find a higher complexity path
-	maze_cell search_from = path[path.size() / 2 - 2];
+	maze_cell search_from = path[path.size() - 2];// / 2 - 2];
 	MazeData::complexity_cell *door_node = this->findGraphNode(door_pos.x, door_pos.y);
 	MazeData::complexity_cell *node = this->findGraphNode(search_from.x, search_from.y);
 	MazeData::complexity_cell *old_node = NULL;
