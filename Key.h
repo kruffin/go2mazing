@@ -3,10 +3,12 @@
 
 class Key : public Player {
 public:
+	bool hidden;
 	bool obtained;
 	double world_inv_x;
 	double world_inv_y;
 	double speed;
+	bool on_target;
 
 	Key() : Player() {
 		this->color = C_MEDIUM_SPRING_GREEN;
@@ -14,6 +16,8 @@ public:
 		this->world_inv_x = 50;
 		this->world_inv_y = 40;
 		this->speed = 40.0;
+		this->hidden = false;
+		this->on_target = false;
 	};
 	Key(int x, int y) : Player(x, y) {
 		this->color = C_MEDIUM_SPRING_GREEN;
@@ -21,6 +25,8 @@ public:
 		this->world_inv_x = 50;
 		this->world_inv_y = 40;
 		this->speed = 40.0;
+		this->hidden = false;
+		this->on_target = false;
 	};
 	~Key() {
 
@@ -59,5 +65,15 @@ public:
 				}
 			}
 		}
+
+		if (!this->on_target && this->world_x == this->world_inv_x && this->world_y == this->world_inv_y) {
+			this->on_target = true;
+		}
 	};
+
+	void draw() {
+		if (!this->hidden) {
+			Player::draw();
+		}
+	}
 };

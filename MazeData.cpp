@@ -339,6 +339,7 @@ bool MazeData::placeDoorAndKey(std::deque<MazeData::maze_cell> path) {
 
 	// Walk backwards and find a higher complexity path
 	maze_cell search_from = path[path.size() / 2 - 2];
+	MazeData::complexity_cell *door_node = this->findGraphNode(door_pos.x, door_pos.y);
 	MazeData::complexity_cell *node = this->findGraphNode(search_from.x, search_from.y);
 	MazeData::complexity_cell *old_node = NULL;
 
@@ -353,7 +354,7 @@ bool MazeData::placeDoorAndKey(std::deque<MazeData::maze_cell> path) {
 		if (node->children.size() > 1) {
 			// go to the end
 			for (int i = 0; i < node->children.size(); ++i) {
-				if (old_node != node->children[i]) {
+				if (old_node != node->children[i] && door_node != node->children[i]) {
 					junctions.push_back(node->children[i]);
 					//this->set(node->children[i]->x, node->children[i]->y, MazeData::KEY_GREEN);
 				}
@@ -399,6 +400,7 @@ bool MazeData::placeDoorAndKey(std::deque<MazeData::maze_cell> path) {
 	return true;
 };
 
+// Finds the graph node at this position.
 MazeData::complexity_cell * MazeData::findGraphNode(int x, int y) {
 
 	std::vector<complexity_cell *> tovisit;

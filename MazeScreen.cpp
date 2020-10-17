@@ -80,6 +80,11 @@ void MazeScreen::update(double dt, double totalTime) {
 	this->goal.update(dt, totalTime);
 	this->green_door.update(dt, totalTime);
 	this->green_key.update(dt, totalTime);
+
+	if (this->green_key.on_target && !this->green_key.hidden) {
+		this->green_key.hidden = true;
+		this->green_door.hidden = true;
+	}
 }
 
 void MazeScreen::draw() {
@@ -269,24 +274,25 @@ bool MazeScreen::handleInput(BaseInput *gamepad) {
 	if (this->maze_complete > 0) {
 		return false; // Don't allow input
 	}
-	// if (gamepad->buttons.top_left || gamepad->buttons.top_right) {
 
-	// 	if (1 == this->maze_data->level && gamepad->buttons.top_left) {
-	// 		change_scene(SCREEN_TITLE, (SceneData *)NULL);
-	// 	} else if(gamepad->buttons.top_left) {
-	// 		MazeData *data = new MazeData(std::clamp(11 + (this->maze_data->level - 2) * 2, 1, this->max_cols),
-	// 									  std::clamp(11 + (this->maze_data->level - 2) * 2, 1, this->max_rows),
-	// 									  this->maze_data->level - 1);
-	// 		change_scene(SCREEN_MAZE, data);
-	// 	}
-	// 	// else {
-	// 	// 	MazeData *data = new MazeData(std::clamp(11 + this->maze_data->level * 2, 1, this->max_cols),
-	// 	// 								  std::clamp(11 + this->maze_data->level * 2, 1, this->max_rows),
-	// 	// 								  this->maze_data->level + 1);
-	// 	// 	change_scene(SCREEN_MAZE, data);
-	// 	// }
-	// 	return true;
-	// }
+	if (gamepad->lt1 || gamepad->rt1) {
+
+		if (1 == this->maze_data->level && gamepad->lt1) {
+			change_scene(SCREEN_TITLE, (SceneData *)NULL);
+		} else if(gamepad->lt1) {
+			MazeData *data = new MazeData(std::clamp(11 + (this->maze_data->level - 2) * 2, 1, this->max_cols),
+										  std::clamp(11 + (this->maze_data->level - 2) * 2, 1, this->max_rows),
+										  this->maze_data->level - 1);
+			change_scene(SCREEN_MAZE, data);
+		}
+		else {
+			MazeData *data = new MazeData(std::clamp(11 + this->maze_data->level * 2, 1, this->max_cols),
+										  std::clamp(11 + this->maze_data->level * 2, 1, this->max_rows),
+										  this->maze_data->level + 1);
+			change_scene(SCREEN_MAZE, data);
+		}
+		return true;
+	}
 
 
 	if (gamepad->left) {
@@ -367,6 +373,10 @@ void MazeScreen::setSceneData(SceneData *data) {
 		this->green_key.world_x = this->begin_x + key_x * this->point_size;
 		this->green_key.world_y = this->begin_y + key_y * this->point_size;
 		this->green_key.obtained = false;
+		this->green_key.hidden = false;
+		this->green_key.on_target = false;
+		this->green_key.world_inv_x = this->green_door.world_x;
+		this->green_key.world_inv_y = this->green_door.world_y;
 		std::cout << "goal world pos: (" << this->goal.world_x << ", " << this->goal.world_y << ")" << std::endl;
 		std::cout << "exit world pos: (" << this->exit.world_x << ", " << this->exit.world_y << ")" << std::endl;
 		std::cout << "exit dimensions: (" << this->exit.width << ", " << this->exit.height << ")" << std::endl;

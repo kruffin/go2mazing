@@ -224,6 +224,9 @@ void GlfwWnd::getInput(BaseInput *input) {
 	input->right = glfwGetKey(this->window, GLFW_KEY_RIGHT) == GLFW_PRESS;
 	input->up = glfwGetKey(this->window, GLFW_KEY_UP) == GLFW_PRESS;
 	input->down = glfwGetKey(this->window, GLFW_KEY_DOWN) == GLFW_PRESS;
+
+	input->lt1 = glfwGetKey(this->window, GLFW_KEY_L) == GLFW_PRESS;
+	input->rt1 = glfwGetKey(this->window, GLFW_KEY_R) == GLFW_PRESS;
 };
 
 void GlfwWnd::playSound(const short* data, int frames) {
