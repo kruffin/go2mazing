@@ -20,7 +20,14 @@ There are two ways to build this program:
 #### 0. Common
 The following packages are required:
 
-    build-essential libopenal-dev
+    build-essential libopenal-dev libpng-dev
+
+If running on Ubuntu 18 (the current builds from HardKernel are) then a newer gcc is required (see here for more information - https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/):
+
+    sudo apt install software-properties-common
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    sudo apt install gcc-9 g++-9
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
 
 #### 1. Go Advance Prereqs
 This requires the libgo2 library from: https://github.com/OtherCrashOverride/libgo2 It should already be on the ODroid Go Advance.

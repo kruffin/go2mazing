@@ -173,7 +173,7 @@ void MazeScreen::draw() {
 }
 
 bool MazeScreen::load(std::string programPath) {
-	if (!this->player.load(programPath + "images/candle_11.png", 4, 4, 0)) {
+	if (!this->player.load(programPath + "images/candle_girl_11.png", 4, 4, 0)) {
 		return false;
 	}
 	if (!this->goal.load(programPath + "images/cake_11.png", 4, 1, 0)) {

@@ -24,11 +24,12 @@ TitleScreen::TitleScreen(int screen_width, int screen_height) {
 	this->author_text_color = C_GRAY;
 	this->play_time = -1;
 
-	this->version = std::string("v0.2.0");
+	this->version = std::string("v0.3.0");
 	this->prill = Player();
 	this->cake = Goal();
 	this->green_key = Goal();
 	this->green_door = Goal();
+	this->intro_screen = Goal();
 
 	this->prill.world_x = 60.0;
 	this->prill.world_y = 5.0;
@@ -41,6 +42,8 @@ TitleScreen::TitleScreen(int screen_width, int screen_height) {
 
 	this->green_door.world_x = 90.0;
 	this->green_door.world_y = 5.0;
+
+	this->intro_screen.world_y = -50.0;
 }
 
 TitleScreen::~TitleScreen() {
@@ -81,6 +84,10 @@ bool TitleScreen::load(std::string programPath) {
 		std::cout << "Failed to load door." << std::endl;
 		return false;
 	}
+	if (!this->intro_screen.load(programPath + "images/intro_480_320.png", 27, 1, 0)) {
+		std::cout << "Failed to load intro." << std::endl;
+		return false;
+	}
 
 	return true;
 }
@@ -113,6 +120,7 @@ void TitleScreen::update(double dt, double totalTime) {
 	this->cake.update(dt, totalTime);
 	this->green_key.update(dt, totalTime);
 	this->green_door.update(dt, totalTime);
+	this->intro_screen.update(dt, totalTime);
 }
 
 void TitleScreen::draw() {
@@ -124,6 +132,8 @@ void TitleScreen::draw() {
 
 	//std::cout << "x: " << g_x << " y: " << g_y << std::endl;
 	UG_PutString(int(this->x), int(this->y), const_cast<char*>(this->title.c_str()));
+
+	this->intro_screen.draw();
 
 	UG_FillRoundFrame(60, this->screen_height - 110,
 					  this->screen_width - 60, this->screen_height - 70,

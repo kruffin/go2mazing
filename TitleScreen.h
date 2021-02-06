@@ -40,4 +40,5 @@ private:
 	Goal cake;
 	Goal green_key;
 	Goal green_door;
+	Goal intro_screen;
 };
