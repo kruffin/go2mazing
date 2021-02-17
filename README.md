@@ -6,6 +6,24 @@ A fun<sub>*</sub> little maze game for the ODroid Go Advance.
 ![Go 2 Mazing Title Screen](/images/title_screen_web.jpg)
 ![Go 2 Mazing Lvl 43](/images/lvl_43_web.jpg)
 
+### Story
+![Candle1](/images/candle_11_front.png)
+![Candle2](/images/candle_boy_11_front.png)
+![Candle3](/images/candle_girl_11_front.png)
+You are on a table, waiting your turn to be placed upon the cake. As the other candles are chosen, you become anxious. The cake is picked up and you are left on the table with a few others. Not being picked saddens you.
+
+It's not right.
+
+It's not fair.
+
+Cakes are there for you to sit upon and shine your wonderful light. You will have your cake and you will sit upon it proudly.
+
+The like-minded unchosen candles agree and will join you on your quest. Thus begins the/a mazing quest to catch a cake and grace it with your posterior.
+
+Will you be placed in a spot of honor front and center for all to see or on the edges, easily forgotten? Only the future knows and history decides.
+
+Begin.
+
 ## Build
 Pull down the submodules.
 
