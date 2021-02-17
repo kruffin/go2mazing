@@ -3,8 +3,8 @@ A fun<sub>*</sub> little maze game for the ODroid Go Advance.
 
 <sub>*</sub> opinion of its creator; he would even say a mazing game.
 
-![Go 2 Mazing Title Screen](/images/title_screen_web.jpg)
-![Go 2 Mazing Lvl 43](/images/lvl_43_web.jpg)
+![Go 2 Mazing Lvl 1](/images/lvl_1_web.jpg)
+![Go 2 Mazing Lvl 10](/images/lvl_10_web.jpg)
 
 ### Story
 ![Candle1](/images/candle_11_front.png)
