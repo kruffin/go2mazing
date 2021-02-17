@@ -50,4 +50,6 @@ private:
 	short begin_y;
 
 	void movePLayer(int new_x, int new_y, int direction);
+	MazeData::maze_cell rideRoad(int start_x, int start_y, int end_x, int end_y);
+	MazeData::complexity_cell * nextOnRoad(MazeData::complexity_cell *target, MazeData::complexity_cell *excluded);
 };

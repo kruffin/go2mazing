@@ -297,23 +297,77 @@ bool MazeScreen::handleInput(BaseInput *gamepad) {
 
 	if (gamepad->left) {
 		int new_x = std::clamp(this->player.cell_x - 1, -1, this->maze_data->columns);
-		this->movePLayer(new_x, this->player.cell_y, Player::ANIM_LEFT);
+		MazeData::maze_cell new_cell = this->rideRoad(this->player.cell_x, this->player.cell_y, new_x, this->player.cell_y);
+		this->movePLayer(new_cell.x, new_cell.y, Player::ANIM_LEFT);
 		return true;
 	} else if (gamepad->right) {
 		int new_x = std::clamp(this->player.cell_x + 1, -1, this->maze_data->columns);
-		this->movePLayer(new_x, this->player.cell_y, Player::ANIM_RIGHT);
+		MazeData::maze_cell new_cell = this->rideRoad(this->player.cell_x, this->player.cell_y, new_x, this->player.cell_y);
+		this->movePLayer(new_cell.x, new_cell.y, Player::ANIM_RIGHT);
 		return true;
 	} else if (gamepad->up && -1 != this->player.cell_x) {
 		int new_y = std::clamp(this->player.cell_y - 1, 0, this->maze_data->rows - 1);
-		this->movePLayer(this->player.cell_x, new_y, Player::ANIM_UP);
+		MazeData::maze_cell new_cell = this->rideRoad(this->player.cell_x, this->player.cell_y, this->player.cell_x, new_y);
+		this->movePLayer(new_cell.x, new_cell.y, Player::ANIM_UP);
 		return true;
 	} else if (gamepad->down && -1 != this->player.cell_x) {
 		int new_y = std::clamp(this->player.cell_y + 1, 0, this->maze_data->rows - 1);
-		this->movePLayer(this->player.cell_x, new_y, Player::ANIM_DOWN);
+		MazeData::maze_cell new_cell = this->rideRoad(this->player.cell_x, this->player.cell_y, this->player.cell_x, new_y);
+		this->movePLayer(new_cell.x, new_cell.y, Player::ANIM_DOWN);
 		return true;
 	}
 	return false;
 }
+
+MazeData::maze_cell MazeScreen::rideRoad(int start_x, int start_y, int end_x, int end_y) {
+	//std::cout << "start x:" << start_x << ", start y:" << start_y << "end x:" << end_x << ", end y:" << end_y << std::endl;
+	if (start_x == end_x && start_y == end_y) {
+		return {start_x, start_y};
+	} else if (start_x < 0) { // The player starts outside of the maze.
+		return {end_x, end_y};
+	}
+
+	// Count neighbors; if more than one stop; if only one and of same type, continue
+	MazeData::complexity_cell * previous = this->maze_data->findGraphNode(start_x, start_y);
+	MazeData::complexity_cell * current = this->maze_data->findGraphNode(end_x, end_y);
+	if (NULL == current) {
+		// Probably a wall.
+		return {start_x, start_y};
+	}
+	MazeData::complexity_cell * tmp = NULL;
+	while (tmp = this->nextOnRoad(current, previous)) {
+		previous = current;
+		current = tmp;
+	}
+
+	return {current->x, current->y};
+};
+
+// Get the next cell on the current road (same color) or NULL if the road stops.
+MazeData::complexity_cell * MazeScreen::nextOnRoad(MazeData::complexity_cell *target, MazeData::complexity_cell *excluded) {
+	MazeData::complexity_cell *to_ret = NULL;
+	char target_type = this->maze_data->get(target->x, target->y);
+	char excluded_type = this->maze_data->get(excluded->x, excluded->y);
+	// emergent behavior here since while walking our previous spot is marked as walked while new
+	// prospective spots are still unwalked paths. this means our normal walking still moves one
+	// tile at a time, while going back over old paths will allow us to ride it <- insert cowboy dance.
+	if (target->parent != excluded && target->parent != NULL && target_type == excluded_type) {
+		to_ret = target->parent;
+	}
+
+	for (int i = 0; i < target->children.size(); ++i) {
+		if (target->children[i] != excluded) {
+			target_type = this->maze_data->get(target->children[i]->x, target->children[i]->y);
+			if (to_ret != NULL || target_type != excluded_type) {
+				return NULL; // Too many options or not the same type.
+			} else {
+				to_ret = target->children[i];
+			}
+		}
+	}
+
+	return to_ret;
+};
 
 void MazeScreen::setSceneData(SceneData *data) {
 	if (data->getType() == SceneData::TYPE_SCENE_MAZE) {
